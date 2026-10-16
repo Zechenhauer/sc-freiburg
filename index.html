@@ -800,7 +800,7 @@
         document.getElementById('visitorCountDisplay').textContent = count.toLocaleString('de-DE');
     }
 
-    // SLIDESHOW MIT DEINEN FREIBURG BILDERN
+    // SLIDESHOW MIT FREIBURG BILDERN
     const slides = [
         { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20fans.jpg", name: "SC Freiburg Fans" },
         { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20fans01.jpg", name: "Fankurve & Stimmung" },
@@ -921,7 +921,7 @@
                 auth: auth
             }, { onConflict: 'endpoint' });
 
-            alert("Push-Alarm für SC Freiburg erfolgreich aktiviert!");
+            alert("Push-Alarm für Bundesliga-Live-Spiele erfolgreich aktiviert!");
         } catch (error) {
             console.error('Fehler bei der Push-Registrierung:', error);
             alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
@@ -936,11 +936,11 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'push_subscriptions_scf',
-                    title: "🔴⚪ Freiburg Test-Tor-Alarm",
-                    body: "Das Test-Tor für den SC Freiburg wurde erfolgreich ausgelöst!"
+                    title: "⚽ Bundesliga Test-Tor-Alarm",
+                    body: "Das Test-Tor wurde erfolgreich ausgelöst!"
                 })
             });
-            if (response.ok) alert("Test-Push für SC Freiburg erfolgreich ausgelöst!");
+            if (response.ok) alert("Test-Push erfolgreich ausgelöst!");
             else alert("Fehler von der Edge Function.");
         } catch (e) {
             alert("Netzwerkfehler: " + e.message);
@@ -962,7 +962,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'push_subscriptions_scf',
-                    title: `🔴⚪ TOR FÜR FREIBURG! (${hScore}:${aScore})`,
+                    title: `⚽ TOR IN DER BUNDESLIGA! (${hScore}:${aScore})`,
                     body: bodyText
                 })
             });
@@ -1095,9 +1095,8 @@
                         let prev = previousEspnScores[matchId];
                         if (prev !== undefined && isLive) {
                             if (homeScoreVal > prev.home || awayScoreVal > prev.away) {
-                                if (homeComp.team.displayName.toLowerCase().includes('freiburg') || awayComp.team.displayName.toLowerCase().includes('freiburg')) {
-                                    triggerGoalPush(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText);
-                                }
+                                // Triggert jetzt für alle Live-Spiele genau 1 Mal (inkl. Torschütze)
+                                triggerGoalPush(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText);
                             }
                         }
                         previousEspnScores[matchId] = { home: homeScoreVal, away: awayScoreVal };
