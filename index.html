@@ -108,6 +108,67 @@
         .slide-prev { left: 10px; }
         .slide-next { right: 10px; }
 
+        /* ZUSÄTZLICHE KADER-DIASHOW IM HSV-STIL */
+        .kader-diashow-wrapper {
+            width: 100%;
+            background: #170d0d;
+            border: 2px solid var(--scf-red);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(227, 6, 19, 0.2);
+            overflow: hidden;
+        }
+        .kader-diashow-header {
+            background-color: var(--scf-red);
+            color: #ffffff;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .kader-diashow-body {
+            position: relative;
+            padding: 15px;
+            background: linear-gradient(135deg, #1c1111 0%, #0a0404 100%);
+            border: 1px solid rgba(227, 6, 19, 0.3);
+            border-radius: 6px;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 340px;
+            overflow: hidden;
+        }
+        .kader-slide-img {
+            max-width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .kader-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #ffffff;
+            border: 1px solid var(--scf-red);
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+        .kader-btn:hover { background: var(--scf-red); }
+        .kader-prev { left: 15px; }
+        .kader-next { right: 15px; }
+
         .title-row {
             display: flex;
             align-items: center;
@@ -546,11 +607,11 @@
 <body>
 
 <div class="container">
-    <!-- SLIDESHOW OBEN -->
+    <!-- HAUPT-BANNER OBEN -->
     <div class="banner-wrapper">
         <div class="slideshow-container">
             <button class="slide-btn slide-prev" onclick="prevSlide()">❮</button>
-            <img id="slideImage" src="" alt="SC Freiburg Diashow" class="slide-img">
+            <img id="slideImage" src="" alt="SC Freiburg Banner" class="slide-img">
             <button class="slide-btn slide-next" onclick="nextSlide()">❯</button>
         </div>
         <div class="slide-caption" id="slideCaption">SC Freiburg</div>
@@ -566,6 +627,18 @@
         <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
         <span class="supabase-badge" id="cloudStatusBadge">● ESPN Live-Ticker Aktiv</span>
         <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIEL LÄUFT</div>
+    </div>
+
+    <!-- ZUSÄTZLICHE KADER-DIASHOW IM HSV-STIL (OHNE TEXT UNTER DEM BILD) -->
+    <div class="kader-diashow-wrapper">
+        <div class="kader-diashow-header">
+            ⚽ SCF-Kader Diashow
+        </div>
+        <div class="kader-diashow-body">
+            <button class="kader-btn kader-prev" onclick="prevKaderSlide()">❮</button>
+            <img id="kaderSlideImage" src="" alt="SCF Kader Diashow" class="kader-slide-img">
+            <button class="kader-btn kader-next" onclick="nextKaderSlide()">❯</button>
+        </div>
     </div>
 
     <!-- FREIBURG AUSWERTUNG -->
@@ -789,7 +862,7 @@
     const ADMIN_PIN = "1904";
     let isAdmin = false;
 
-    // BESUCHER COUNTER (Startwert 20)
+    // BESUCHER COUNTER
     function initVisitorCounter() {
         let count = parseInt(localStorage.getItem('scf_app_visitors') || '20');
         if (!sessionStorage.getItem('visited_scf_session')) {
@@ -800,7 +873,7 @@
         document.getElementById('visitorCountDisplay').textContent = count.toLocaleString('de-DE');
     }
 
-    // SLIDESHOW MIT FREIBURG BILDERN
+    // 1. HAUPT-BANNER DIASHOW (Oben)
     const slides = [
         { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20fans.jpg", name: "SC Freiburg Fans" },
         { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20fans01.jpg", name: "Fankurve & Stimmung" },
@@ -809,6 +882,67 @@
     ];
     let currentSlideIndex = 0;
     let slideInterval;
+
+    function showSlide(index) {
+        if (index >= slides.length) currentSlideIndex = 0;
+        else if (index < 0) currentSlideIndex = slides.length - 1;
+        else currentSlideIndex = index;
+
+        let imgElem = document.getElementById('slideImage');
+        let captionElem = document.getElementById('slideCaption');
+        if (!imgElem) return;
+
+        imgElem.style.opacity = 0;
+        setTimeout(() => {
+            imgElem.src = slides[currentSlideIndex].url;
+            captionElem.textContent = slides[currentSlideIndex].name;
+            imgElem.style.opacity = 1;
+        }, 200);
+    }
+
+    function nextSlide() { showSlide(currentSlideIndex + 1); resetTimer(); }
+    function prevSlide() { showSlide(currentSlideIndex - 1); resetTimer(); }
+    function resetTimer() {
+        clearInterval(slideInterval);
+        slideInterval = setInterval(() => { showSlide(currentSlideIndex + 1); }, 5000);
+    }
+
+    // 2. KADER-DIASHOW (Im HSV-Stil, exakte Reihenfolge, ohne Beschriftung unter dem Bild)
+    const kaderSlides = [
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Trainer.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Tor.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Abwehr.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Abwehr01.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Mittelfeld.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Mittelfeld01.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Angriff.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Gemischt.png" },
+        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Gemischt01.png" }
+    ];
+    let currentKaderIndex = 0;
+    let kaderInterval;
+
+    function showKaderSlide(index) {
+        if (index >= kaderSlides.length) currentKaderIndex = 0;
+        else if (index < 0) currentKaderIndex = kaderSlides.length - 1;
+        else currentKaderIndex = index;
+
+        let imgElem = document.getElementById('kaderSlideImage');
+        if (!imgElem) return;
+
+        imgElem.style.opacity = 0;
+        setTimeout(() => {
+            imgElem.src = kaderSlides[currentKaderIndex].url;
+            imgElem.style.opacity = 1;
+        }, 200);
+    }
+
+    function nextKaderSlide() { showKaderSlide(currentKaderIndex + 1); resetKaderTimer(); }
+    function prevKaderSlide() { showKaderSlide(currentKaderIndex - 1); resetKaderTimer(); }
+    function resetKaderTimer() {
+        clearInterval(kaderInterval);
+        kaderInterval = setInterval(() => { showKaderSlide(currentKaderIndex + 1); }, 6000);
+    }
 
     const legendenInfos = {
         "Volker Finke": "Volker Finke prägte den SC Freiburg von 1991 bis 2007 als Jahrhunderttrainer. Er führte den Sport-Club erstmals in die Bundesliga und etablierte die berühmte Freiburger Fussballschule.",
@@ -839,37 +973,12 @@
         document.getElementById('historieWidget').textContent = `"${historieFakten[historieIdx]}"`;
     }
 
-    function showSlide(index) {
-        if (index >= slides.length) currentSlideIndex = 0;
-        else if (index < 0) currentSlideIndex = slides.length - 1;
-        else currentSlideIndex = index;
-
-        let imgElem = document.getElementById('slideImage');
-        let captionElem = document.getElementById('slideCaption');
-        if (!imgElem) return;
-
-        imgElem.style.opacity = 0;
-        setTimeout(() => {
-            imgElem.src = slides[currentSlideIndex].url;
-            captionElem.textContent = slides[currentSlideIndex].name;
-            imgElem.style.opacity = 1;
-        }, 200);
-    }
-
-    function nextSlide() { showSlide(currentSlideIndex + 1); resetTimer(); }
-    function prevSlide() { showSlide(currentSlideIndex - 1); resetTimer(); }
-    function resetTimer() {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(() => { showSlide(currentSlideIndex + 1); }, 5000);
-    }
-
     let teamLogos = {};
     let leagueMatches = {};
     let currentMatchday = 6; 
     let isInitialized = false;
     let nextMatchDateTime = null;
     let previousEspnScores = {};
-    let sentGoalEvents = {};
 
     const matchdayFridays = {
         1: "2026-08-28", 2: "2026-09-04", 3: "2026-09-11", 4: "2026-09-18", 5: "2026-10-09",
@@ -947,27 +1056,33 @@
         }
     }
 
-    async function triggerGoalPush(home, away, hScore, aScore, scorerText = "") {
-        let goalKey = `${home}_${away}_${hScore}_${aScore}`;
-        if (sentGoalEvents[goalKey]) return;
-        sentGoalEvents[goalKey] = true;
+    // ROBUSTE PUSH-LOGIK (Wartet auf Torschützen & verhindert Mehrfach-Pushes geräteübergreifend via localStorage)
+    async function triggerGoalPush(home, away, hScore, aScore, latestScorer) {
+        let matchKey = `scf_st_${currentMatchday}_${home}_vs_${away}`;
+        let pushKey = `pushed_${matchKey}_${hScore}_${aScore}`;
+        let alreadyPushed = localStorage.getItem(pushKey) === 'true';
 
-        try {
-            let bodyText = `${home} vs ${away} — Spielstand: ${hScore}:${aScore}`;
-            if (scorerText) bodyText += ` (${scorerText})`;
+        let hasValidScorer = latestScorer && !latestScorer.includes("Tor") && latestScorer.trim() !== "⚽";
 
-            await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    table: 'push_subscriptions_scf',
-                    title: `⚽ TOR IN DER BUNDESLIGA! (${hScore}:${aScore})`,
-                    body: bodyText
-                })
-            });
-        } catch (e) {
-            console.error("Fehler beim Push:", e);
+        if (hasValidScorer && !alreadyPushed) {
+            localStorage.setItem(pushKey, 'true');
+
+            try {
+                let bodyText = `${home} ${hScore} : ${aScore} ${away}\nTorschütze: ${latestScorer}`;
+
+                await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        table: 'push_subscriptions_scf',
+                        title: "⚽ TOR! (1. Bundesliga)",
+                        body: bodyText
+                    })
+                });
+            } catch (e) {
+                console.error("Fehler beim Push:", e);
+            }
         }
     }
 
@@ -1095,7 +1210,6 @@
                         let prev = previousEspnScores[matchId];
                         if (prev !== undefined && isLive) {
                             if (homeScoreVal > prev.home || awayScoreVal > prev.away) {
-                                // Triggert jetzt für alle Live-Spiele genau 1 Mal (inkl. Torschütze)
                                 triggerGoalPush(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText);
                             }
                         }
@@ -1536,10 +1650,17 @@
         if (e.target === document.getElementById('legendModal')) closeLegendModal();
     }
 
-    // INITIALISIERUNG
+    // INITIALISIERUNG BEIDER DIASHOWS UND DATEN
     initVisitorCounter();
+    
+    // Hauptbanner starten
     showSlide(0);
     resetTimer();
+
+    // Kader-Diashow starten
+    showKaderSlide(0);
+    resetKaderTimer();
+
     loadEspnMatchdayData();
 
     // LIVE-AKTUALISIERUNG ALLE 30 SEKUNDEN
