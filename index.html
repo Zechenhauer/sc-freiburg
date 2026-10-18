@@ -108,7 +108,6 @@
         .slide-prev { left: 10px; }
         .slide-next { right: 10px; }
 
-        /* ZUSÄTZLICHE KADER-DIASHOW IM HSV-STIL */
         .kader-diashow-wrapper {
             width: 100%;
             background: #170d0d;
@@ -629,7 +628,7 @@
         <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIEL LÄUFT</div>
     </div>
 
-    <!-- ZUSÄTZLICHE KADER-DIASHOW IM HSV-STIL (OHNE TEXT UNTER DEM BILD) -->
+    <!-- KADER-DIASHOW -->
     <div class="kader-diashow-wrapper">
         <div class="kader-diashow-header">
             ⚽ SCF-Kader Diashow
@@ -907,7 +906,7 @@
         slideInterval = setInterval(() => { showSlide(currentSlideIndex + 1); }, 5000);
     }
 
-    // 2. KADER-DIASHOW (Im HSV-Stil, exakte Reihenfolge, ohne Beschriftung unter dem Bild)
+    // 2. KADER-DIASHOW
     const kaderSlides = [
         { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Trainer.png" },
         { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Tor.png" },
@@ -1056,7 +1055,7 @@
         }
     }
 
-    // ROBUSTE PUSH-LOGIK (Wartet auf Torschützen & verhindert Mehrfach-Pushes geräteübergreifend via localStorage)
+    // KORRIGIERTE PUSH-LOGIK (Doppel-Push Verhinderung & Torschützen-Check)
     async function triggerGoalPush(home, away, hScore, aScore, latestScorer) {
         let matchKey = `scf_st_${currentMatchday}_${home}_vs_${away}`;
         let pushKey = `pushed_${matchKey}_${hScore}_${aScore}`;
@@ -1304,7 +1303,7 @@
             lastWidget.innerHTML = "Noch kein beendetes Spiel.";
         }
 
-        // --- FORMVERLAUF (Letzte 15 Spiele) ---
+        // --- FORMVERLAUF ---
         let formWidget = document.getElementById('formCurveWidget');
         if (pastMatches.length > 0) {
             let last15 = pastMatches.slice(-15);
@@ -1321,7 +1320,7 @@
             formWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine beendeten Spiele</span>';
         }
 
-        // --- TOP 3 TORSCHÜTZEN KACHEL (SC FREIBURG) ---
+        // --- TOP 3 TORSCHÜTZEN ---
         let scfScorersMap = {};
         pastMatches.forEach(m => {
             let parseScorers = (gList, teamName) => {
@@ -1650,14 +1649,12 @@
         if (e.target === document.getElementById('legendModal')) closeLegendModal();
     }
 
-    // INITIALISIERUNG BEIDER DIASHOWS UND DATEN
+    // INITIALISIERUNG
     initVisitorCounter();
     
-    // Hauptbanner starten
     showSlide(0);
     resetTimer();
 
-    // Kader-Diashow starten
     showKaderSlide(0);
     resetKaderTimer();
 
