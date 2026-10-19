@@ -701,7 +701,7 @@
     <!-- SPIELTAGS-TABELLE -->
     <div class="section-box">
         <div class="section-header">
-            <span id="matchdayTableHeader">Spieltag 6 — Spiele & Ergebnisse</span>
+            <span id="matchdayTableHeader">Spieltag 7 — Spiele & Ergebnisse</span>
             <div class="header-actions">
                 <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
                 <button class="header-action-btn" onclick="loadEspnMatchdayData(true)">🔄 Aktualisieren & Live</button>
@@ -709,7 +709,7 @@
         </div>
         <div class="matchday-controls">
             <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger Spieltag</button>
-            <strong id="matchdayDisplay" style="color: var(--scf-bright-red); font-size: 1.1rem;">Spieltag 6</strong>
+            <strong id="matchdayDisplay" style="color: var(--scf-bright-red); font-size: 1.1rem;">Spieltag 7</strong>
             <button class="matchday-btn" onclick="changeMatchday(1)">Nächster Spieltag ▶</button>
         </div>
         <div class="table-container">
@@ -974,7 +974,7 @@
 
     let teamLogos = {};
     let leagueMatches = {};
-    let currentMatchday = 6; 
+    let currentMatchday = 7; 
     let isInitialized = false;
     let nextMatchDateTime = null;
     let previousEspnScores = {};
@@ -1055,7 +1055,6 @@
         }
     }
 
-    // KORRIGIERTE PUSH-LOGIK (Doppel-Push Verhinderung & Torschützen-Check)
     async function triggerGoalPush(home, away, hScore, aScore, latestScorer) {
         let matchKey = `scf_st_${currentMatchday}_${home}_vs_${away}`;
         let pushKey = `pushed_${matchKey}_${hScore}_${aScore}`;
@@ -1238,7 +1237,17 @@
 
             if (!isInitialized) {
                 isInitialized = true;
-                currentMatchday = 6;
+                // Intelligente Spieltags-Erkennung: Springe zum ersten Spieltag, an dem es noch unvollständige / nicht beendete Spiele gibt
+                let targetMatchday = 7; 
+                for (let s = 1; s <= 34; s++) {
+                    let matches = leagueMatches[s] || [];
+                    let hasUnfinished = matches.some(m => !m.isFinished);
+                    if (hasUnfinished || s === 34) {
+                        targetMatchday = s;
+                        break;
+                    }
+                }
+                currentMatchday = targetMatchday;
             }
 
             if (showAlert) alert("ESPN Live-Daten erfolgreich synchronisiert!");
