@@ -1156,6 +1156,8 @@
                     const isLive = statusType === 'in';
                     if (isLive) hasLive = true;
 
+                    let displayClock = ev.status?.displayClock || "";
+
                     let matchDateObj = new Date(ev.date);
                     let dateStr = ev.date ? ev.date.split('T')[0] : fri;
                     let timeStr = !isNaN(matchDateObj.getTime()) ? matchDateObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : "15:30";
@@ -1169,36 +1171,52 @@
                     
                     if (comp.details && Array.isArray(comp.details)) {
                         comp.details.forEach(detail => {
-                            if (detail.type?.text === "Goal" || detail.scoringPlay || detail.goalValue > 0) {
-                                let playerName = detail.scorer?.athlete?.displayName 
-                                    || detail.athlete?.displayName 
-                                    || (detail.athletesInvolved && detail.athletesInvolved[0]?.displayName)
-                                    || "";
+                            let typeText = (detail.type && detail.type.text) ? detail.type.text.toLowerCase() : "";
+                            let playerName = detail.scorer?.athlete?.displayName 
+                                || detail.athlete?.displayName 
+                                || detail.player?.displayName
+                                || (detail.athletesInvolved && detail.athletesInvolved[0]?.displayName)
+                                || "";
 
-                                if (!playerName && detail.text) {
-                                    let cleanText = detail.text.replace(/scored.*\$/, '').trim();
-                                    if (cleanText && cleanText.toLowerCase() !== 'goal') {
-                                        playerName = cleanText;
-                                    }
+                            if (!playerName && detail.text) {
+                                let cleanText = detail.text.replace(/scored.*\$/, '').trim();
+                                if (cleanText && cleanText.toLowerCase() !== 'goal') {
+                                    playerName = cleanText;
                                 }
+                            }
 
-                                if (!playerName) {
-                                    playerName = detail.team?.displayName || "Tor";
-                                }
+                            if (!playerName) {
+                                playerName = detail.team?.displayName || "Aktion";
+                            }
 
-                                let clock = detail.clock?.displayValue || "";
+                            let clock = detail.clock?.displayValue || "";
+                            let minuteStr = clock ? ` (${clock}')` : '';
+
+                            if (detail.type?.text === "Goal" || detail.scoringPlay || detail.goalValue > 0 || typeText.includes("goal")) {
                                 let notes = "";
                                 if (detail.penalty) notes = " (Pen)";
                                 if (detail.ownGoal) notes = " (ET)";
 
-                                let goalEntry = clock ? `${playerName} (${clock}')` + notes : playerName;
+                                let goalEntry = `⚽ ${playerName}${minuteStr}${notes}`;
                                 latestScorerText = goalEntry;
 
                                 if (detail.team?.id === homeComp.team.id) {
-                                    goalsHome.push(`⚽ ${goalEntry}`);
+                                    goalsHome.push(goalEntry);
                                 } else if (detail.team?.id === awayComp.team.id) {
-                                    goalsAway.push(`⚽ ${goalEntry}`);
+                                    goalsAway.push(goalEntry);
                                 }
+                            } else if (typeText.includes("yellow-red") || typeText.includes("gelb-rot")) {
+                                let cardEntry = `🟨🟥 ${playerName}${minuteStr}`;
+                                if (detail.team?.id === homeComp.team.id) goalsHome.push(cardEntry);
+                                else if (detail.team?.id === awayComp.team.id) goalsAway.push(cardEntry);
+                            } else if (typeText.includes("yellow") || typeText.includes("gelbe karte")) {
+                                let cardEntry = `🟨 ${playerName}${minuteStr}`;
+                                if (detail.team?.id === homeComp.team.id) goalsHome.push(cardEntry);
+                                else if (detail.team?.id === awayComp.team.id) goalsAway.push(cardEntry);
+                            } else if (typeText.includes("red") || typeText.includes("rote karte")) {
+                                let cardEntry = `🟥 ${playerName}${minuteStr}`;
+                                if (detail.team?.id === homeComp.team.id) goalsHome.push(cardEntry);
+                                else if (detail.team?.id === awayComp.team.id) goalsAway.push(cardEntry);
                             }
                         });
                     }
@@ -1223,6 +1241,7 @@
                         awayScore: awayScoreVal,
                         isFinished: statusType === 'post',
                         isLive: isLive,
+                        displayClock: displayClock,
                         dateTime: ev.date,
                         goalsHome: goalsHome,
                         goalsAway: goalsAway
@@ -1237,7 +1256,6 @@
 
             if (!isInitialized) {
                 isInitialized = true;
-                // Intelligente Spieltags-Erkennung: Springe zum ersten Spieltag, an dem es noch unvollständige / nicht beendete Spiele gibt
                 let targetMatchday = 7; 
                 for (let s = 1; s <= 34; s++) {
                     let matches = leagueMatches[s] || [];
@@ -1335,10 +1353,12 @@
             let parseScorers = (gList, teamName) => {
                 if (teamName.toLowerCase().includes('freiburg') && Array.isArray(gList)) {
                     gList.forEach(g => {
-                        let clean = g.replace('⚽', '').replace('(Pen)', '').replace('(ET)', '').trim();
-                        let name = clean.split('(')[0].trim();
-                        if (name) {
-                            scfScorersMap[name] = (scfScorersMap[name] || 0) + 1;
+                        if (g.startsWith('⚽')) {
+                            let clean = g.replace('⚽', '').replace('(Pen)', '').replace('(ET)', '').trim();
+                            let name = clean.split('(')[0].trim();
+                            if (name) {
+                                scfScorersMap[name] = (scfScorersMap[name] || 0) + 1;
+                            }
                         }
                     });
                 }
@@ -1430,11 +1450,13 @@
                 list.forEach(m => {
                     let parse = (gList, team) => {
                         gList.forEach(g => {
-                            let clean = g.replace('⚽', '').replace('(Pen)', '').replace('(ET)', '').trim();
-                            let name = clean.split('(')[0].trim();
-                            if (name) {
-                                if (!scorersMap[name]) scorersMap[name] = { count: 0, team: team };
-                                scorersMap[name].count++;
+                            if (g.startsWith('⚽')) {
+                                let clean = g.replace('⚽', '').replace('(Pen)', '').replace('(ET)', '').trim();
+                                let name = clean.split('(')[0].trim();
+                                if (name) {
+                                    if (!scorersMap[name]) scorersMap[name] = { count: 0, team: team };
+                                    scorersMap[name].count++;
+                                }
                             }
                         });
                     };
@@ -1547,7 +1569,8 @@
 
             let resultDisplay = hasResult ? '<strong>' + m.homeScore + ':' + m.awayScore + '</strong>' : '<span style="color: var(--text-muted); font-style: italic;">vs</span>';
             if (m.isLive) {
-                resultDisplay += '<div style="font-size: 0.65rem; color: var(--scf-bright-red); font-weight: bold; margin-top: 2px; text-align: center;">🔴 LIVE</div>';
+                let clockText = m.displayClock ? ` (${m.displayClock}')` : '';
+                resultDisplay += `<div style="font-size: 0.65rem; color: var(--scf-bright-red); font-weight: bold; margin-top: 2px; text-align: center;">🔴 LIVE${clockText}</div>`;
             } else if (m.isFinished) {
                 resultDisplay += '<div style="font-size: 0.65rem; color: #3fb950; margin-top: 2px; text-align: center;">(Endstand)</div>';
             }
