@@ -647,6 +647,7 @@
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <button class="btn-modal-open" onclick="openLeagueScorersModal()">⚽ Bundesliga-Torschützen</button>
                 <button class="btn-modal-open" onclick="openScfMatchesModal()">📅 Alle Spiele</button>
+                <button class="btn-modal-open" onclick="openCardsModal()" style="background:#e3b341; color:#000;">🟨🟥 Spieler-Karten</button>
             </div>
         </div>
         <div class="stats-grid" id="scfStatsGrid"></div>
@@ -671,8 +672,8 @@
             <div class="dash-card-content" id="topScorersWidget">Wird berechnet...</div>
         </div>
         <div class="dash-card">
-            <div class="dash-card-title">🏟️ Heim vs. Auswärts</div>
-            <div class="dash-card-content" id="homeAwayWidget">Heim: 0S - 0U - 0N (0 Pkt)<br>Auswärts: 0S - 0U - 0N (0 Pkt)</div>
+            <div class="dash-card-title" style="color:var(--scf-bright-red);">🔥 Form-König (letzte 5 Spiele)</div>
+            <div class="dash-card-content" id="formKingWidget">Berechne Formtabelle...</div>
         </div>
         <div class="dash-card">
             <div class="dash-card-title">⭐ SCF-Legenden (Ehrenkabine)</div>
@@ -840,6 +841,37 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="cardsModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">🟨🟥 SC Freiburg — Karten-Übersicht & Sperren</div>
+            <button class="btn-danger" onclick="closeCardsModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+                Hinweis: Nach jeweils 5 Gelben Karten greift gemäß DFB-Statuten eine automatische 1-Spiele-Sperre und der Zähler springt im Anschluss wieder bei 0 an.
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Spieler</th>
+                            <th style="text-align: center; width: 70px;">🟨 Gelb</th>
+                            <th style="text-align: center; width: 80px;">Sperren</th>
+                            <th style="text-align: center; width: 70px;">🟨🟥 Gelb-Rot</th>
+                            <th style="text-align: center; width: 70px;">🟥 Rot</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cardsModalBody">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Karten...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button class="btn" style="margin-top: 15px;" onclick="closeCardsModal()">Schließen</button>
+    </div>
+</div>
+
 <div class="modal-overlay" id="legendModal">
     <div class="modal-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
@@ -959,6 +991,60 @@
         document.getElementById('legendModal').style.display = 'flex';
     }
     function closeLegendModal() { document.getElementById('legendModal').style.display = 'none'; }
+
+    function openCardsModal() {
+        let tbody = document.getElementById('cardsModalBody');
+        tbody.innerHTML = '';
+
+        let playerStats = {};
+        Object.values(leagueMatches).forEach(matchList => {
+            if (!Array.isArray(matchList)) return;
+            matchList.forEach(m => {
+                let parseGoalsAndCards = (gList, teamName) => {
+                    if (teamName.toLowerCase().includes('freiburg') && Array.isArray(gList)) {
+                        gList.forEach(g => {
+                            if (g.includes('🟨') || g.includes('🟥')) {
+                                let parts = g.split(' ');
+                                let icon = parts[0];
+                                let name = parts.slice(1).join(' ').split('(')[0].trim();
+                                if (name) {
+                                    if (!playerStats[name]) playerStats[name] = { yellow: 0, yellowRed: 0, red: 0 };
+                                    if (icon === '🟨') playerStats[name].yellow++;
+                                    else if (icon === '🟨🟥') playerStats[name].yellowRed++;
+                                    else if (icon === '🟥') playerStats[name].red++;
+                                }
+                            }
+                        });
+                    }
+                };
+                parseGoalsAndCards(m.goalsHome, m.home);
+                parseGoalsAndCards(m.goalsAway, m.away);
+            });
+        });
+
+        let players = Object.keys(playerStats);
+        if (players.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Bisher keine Karten erfasst.</td></tr>`;
+        } else {
+            players.forEach(name => {
+                let st = playerStats[name];
+                let suspensions = Math.floor(st.yellow / 5);
+                let currentYellow = st.yellow % 5;
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: #ffffff;">${name}</td>
+                    <td style="text-align: center; font-weight: bold; color: #e3b341;">${st.yellow} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${currentYellow} akt.)</span></td>
+                    <td style="text-align: center; font-weight: bold; color: ${suspensions > 0 ? '#f85149' : 'var(--text-muted)'};">${suspensions > 0 ? suspensions + 'x gesperrt' : 'Keine'}</td>
+                    <td style="text-align: center; font-weight: bold; color: #e3b341;">${st.yellowRed}</td>
+                    <td style="text-align: center; font-weight: bold; color: #f85149;">${st.red}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        document.getElementById('cardsModal').style.display = 'flex';
+    }
+    function closeCardsModal() { document.getElementById('cardsModal').style.display = 'none'; }
 
     const historieFakten = [
         "Der SC Freiburg wurde am 30. Mai 1904 gegründet.",
@@ -1384,19 +1470,64 @@
             topScorersWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine Torschützen erfasst</span>';
         }
 
-        let homeW = {p:0, s:0, u:0, n:0, pts:0};
-        let awayW = {p:0, s:0, u:0, n:0, pts:0};
-        pastMatches.forEach(m => {
-            let isHome = m.home.toLowerCase().includes('freiburg');
-            let myG = isHome ? m.homeScore : m.awayScore;
-            let oppG = isHome ? m.awayScore : m.homeScore;
-            let obj = isHome ? homeW : awayW;
-            obj.p++;
-            if (myG > oppG) { obj.s++; obj.pts += 3; }
-            else if (myG === oppG) { obj.u++; obj.pts += 1; }
-            else { obj.n++; }
+        // --- FORM-KÖNIG KACHEL WIE AUF DEM FOTO ---
+        let formStats = {};
+        let allTeams = [];
+        Object.values(leagueMatches).forEach(matchList => {
+            if (Array.isArray(matchList)) {
+                matchList.forEach(m => {
+                    if (!allTeams.includes(m.home)) allTeams.push(m.home);
+                    if (!allTeams.includes(m.away)) allTeams.push(m.away);
+                });
+            }
         });
-        document.getElementById('homeAwayWidget').innerHTML = `Heim: ${homeW.s}S - ${homeW.u}U - ${homeW.n}N (${homeW.pts} Pkt)<br>Auswärts: ${awayW.s}S - ${awayW.u}U - ${awayW.n}N (${awayW.pts} Pkt)`;
+        allTeams.forEach(t => { formStats[t] = { name: t, matches: [] }; });
+
+        Object.values(leagueMatches).forEach(matchList => {
+            if (!Array.isArray(matchList)) return;
+            matchList.forEach(m => {
+                if (m.homeScore === undefined || m.homeScore === null || m.awayScore === undefined || m.awayScore === null) return;
+                let h = m.home, a = m.away;
+                if (!formStats[h] || !formStats[a]) return;
+                formStats[h].matches.push({ date: m.dateTime || m.date, result: m.homeScore > m.awayScore ? 'S' : (m.homeScore === m.awayScore ? 'U' : 'N'), gf: m.homeScore, ga: m.awayScore, pts: m.homeScore > m.awayScore ? 3 : (m.homeScore === m.awayScore ? 1 : 0) });
+                formStats[a].matches.push({ date: m.dateTime || m.date, result: m.awayScore > m.homeScore ? 'S' : (m.awayScore === m.homeScore ? 'U' : 'N'), gf: m.awayScore, ga: m.homeScore, pts: m.awayScore > m.homeScore ? 3 : (m.awayScore === m.homeScore ? 1 : 0) });
+            });
+        });
+
+        let formList = Object.values(formStats).map(team => {
+            team.matches.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
+            let last5 = team.matches.slice(0, 5);
+            let formPts = last5.reduce((sum, item) => sum + item.pts, 0);
+            let gf = last5.reduce((sum, item) => sum + item.gf, 0);
+            let ga = last5.reduce((sum, item) => sum + item.ga, 0);
+            return { name: team.name, last5: last5, formPts: formPts, gf: gf, ga: ga };
+        });
+        formList.sort((a,b) => b.formPts - a.formPts);
+        let formKing = formList.length > 0 ? formList[0] : null;
+
+        let kingBadges = "";
+        if (formKing && formKing.last5.length > 0) {
+            kingBadges = formKing.last5.map(m => {
+                let bg = m.result === 'S' ? '#2ea043' : (m.result === 'U' ? '#e3b341' : '#f85149');
+                let color = m.result === 'U' ? '#000' : '#fff';
+                return `<span style="background:${bg}; color:${color}; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; font-size:0.75rem;">${m.result}</span>`;
+            }).reverse().join(' ');
+        }
+
+        let kingLogoUrl = formKing ? (teamLogos[formKing.name.trim().toLowerCase()] || "") : "";
+        let kingLogoHtml = kingLogoUrl ? `<img src="${kingLogoUrl}" alt="${formKing.name}" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 8px;">` : '';
+
+        let formWidgetContent = document.getElementById('formKingWidget');
+        if (formKing) {
+            formWidgetContent.innerHTML = `
+                <div style="display:flex; align-items:center; margin-bottom:12px;">${kingLogoHtml}<span style="font-size:1.05rem; font-weight:bold; color:#ffffff;">${formKing.name}</span></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.9rem;"><span style="color:var(--text-muted);">Punkte (L5):</span><strong style="color:#3fb950;">${formKing.formPts} Pkt</strong></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.9rem;"><span style="color:var(--text-muted);">Tore (L5):</span><strong style="color:#e3b341;">${formKing.gf}:${formKing.ga}</strong></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;"><span style="color:var(--text-muted);">Serie:</span><div style="display:flex; gap:4px;">${kingBadges || '<span style="color:var(--text-muted)">-</span>'}</div></div>
+            `;
+        } else {
+            formWidgetContent.innerHTML = "Keine Daten verfügbar.";
+        }
     }
 
     function updateCountdown() {
@@ -1679,6 +1810,7 @@
         if (e.target === document.getElementById('scfMatchesModal')) closeScfMatchesModal();
         if (e.target === document.getElementById('leagueScorersModal')) closeLeagueScorersModal();
         if (e.target === document.getElementById('legendModal')) closeLegendModal();
+        if (e.target === document.getElementById('cardsModal')) closeCardsModal();
     }
 
     // INITIALISIERUNG
