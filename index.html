@@ -1141,32 +1141,40 @@
         }
     }
 
-    async function triggerGoalPush(home, away, hScore, aScore, latestScorer) {
-        let matchKey = `scf_st_${currentMatchday}_${home}_vs_${away}`;
-        let pushKey = `pushed_${matchKey}_${hScore}_${aScore}`;
-        let alreadyPushed = localStorage.getItem(pushKey) === 'true';
+    async function triggerGoalPush(home, away, hScore, aScore, latestScorer, matchId) {
+        if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
 
-        let hasValidScorer = latestScorer && !latestScorer.includes("Tor") && latestScorer.trim() !== "⚽";
+        let uniqueGoalId = `${matchId}_${latestScorer}_${hScore}_${aScore}`;
 
-        if (hasValidScorer && !alreadyPushed) {
-            localStorage.setItem(pushKey, 'true');
+        try {
+            let { data: existing, error: checkError } = await supabaseClient
+                .from('sent_goals_freiburg')
+                .select('goal_id')
+                .eq('goal_id', uniqueGoalId)
+                .maybeSingle();
 
-            try {
-                let bodyText = `${home} ${hScore} : ${aScore} ${away}\nTorschütze: ${latestScorer}`;
+            if (!existing && !checkError) {
+                let { error: insertError } = await supabaseClient
+                    .from('sent_goals_freiburg')
+                    .insert([{ goal_id: uniqueGoalId }]);
 
-                await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        table: 'push_subscriptions_scf',
-                        title: "⚽ TOR! (1. Bundesliga)",
-                        body: bodyText
-                    })
-                });
-            } catch (e) {
-                console.error("Fehler beim Push:", e);
+                if (!insertError) {
+                    let bodyText = `${home} ${hScore} : ${aScore} ${away}\nTorschütze: ${latestScorer}`;
+
+                    await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            table: 'push_subscriptions_scf',
+                            title: "⚽ TOR! (1. Bundesliga)",
+                            body: bodyText
+                        })
+                    });
+                }
             }
+        } catch (e) {
+            console.error("Fehler beim Freiburg Tor-Cache:", e);
         }
     }
 
@@ -1307,12 +1315,12 @@
                         });
                     }
 
+                    let matchId = 'espn_' + ev.id;
                     if (homeScoreVal !== null && awayScoreVal !== null) {
-                        let matchId = 'espn_' + ev.id;
                         let prev = previousEspnScores[matchId];
                         if (prev !== undefined && isLive) {
                             if (homeScoreVal > prev.home || awayScoreVal > prev.away) {
-                                triggerGoalPush(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText);
+                                triggerGoalPush(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText, matchId);
                             }
                         }
                         previousEspnScores[matchId] = { home: homeScoreVal, away: awayScoreVal };
