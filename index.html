@@ -46,6 +46,38 @@
             box-shadow: 0 4px 20px rgba(227, 6, 19, 0.15);
         }
 
+        /* LIVE-TOR-TICKER (FÜR ALLE TORE) */
+        .live-goal-ticker {
+            background: linear-gradient(135deg, #2b0808 0%, #1c1111 100%);
+            border: 1px solid var(--scf-bright-red);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: none;
+            box-shadow: 0 4px 15px rgba(227, 6, 19, 0.3);
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { border-color: rgba(255, 26, 43, 0.4); }
+            50% { border-color: rgba(255, 26, 43, 1); }
+            100% { border-color: rgba(255, 26, 43, 0.4); }
+        }
+        .live-goal-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: var(--scf-bright-red);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .live-goal-content {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
         .banner-wrapper {
             width: 100%;
             display: flex;
@@ -606,6 +638,15 @@
 <body>
 
 <div class="container">
+    <!-- LIVE-TOR-TICKER (FÜR ALLE TORE) -->
+    <div class="live-goal-ticker" id="liveGoalTickerBox">
+        <div class="live-goal-header">
+            <span>⚽ LIVE-TOR TICKER (ALLE BUNDESLIGA-SPIELE)</span>
+            <span id="liveGoalTime" style="margin-left: auto; color: var(--text-muted); font-weight: normal;"></span>
+        </div>
+        <div class="live-goal-content" id="liveGoalTickerText">Warte auf Tore in der Bundesliga...</div>
+    </div>
+
     <!-- HAUPT-BANNER OBEN -->
     <div class="banner-wrapper">
         <div class="slideshow-container">
@@ -1115,7 +1156,7 @@
                 auth: auth
             }, { onConflict: 'endpoint' });
 
-            alert("Push-Alarm für Bundesliga-Live-Spiele erfolgreich aktiviert!");
+            alert("Ligaweiter Push-Alarm für alle Bundesliga-Tore erfolgreich aktiviert!");
         } catch (error) {
             console.error('Fehler bei der Push-Registrierung:', error);
             alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
@@ -1130,8 +1171,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'push_subscriptions_scf',
-                    title: "⚽ Bundesliga Test-Alarm",
-                    body: "Das Test-Tor für die Bundesliga wurde erfolgreich ausgelöst!"
+                    title: "⚽ Bundesliga Tor-Alarm",
+                    body: "Test-Alarm für alle Bundesliga-Partien erfolgreich ausgelöst!"
                 })
             });
             if (response.ok) alert("Test-Push erfolgreich ausgelöst!");
@@ -1141,28 +1182,40 @@
         }
     }
 
-    async function triggerGoalPush(home, away, hScore, aScore, latestScorer, matchId) {
+    // LIGAWEITE TOR-ERKENNUNG FÜR IN-APP TICKER & PUSH (FÜR JEDE MANNSCHAFT)
+    async function checkAllGoalsAndNotify(home, away, hScore, aScore, latestScorer, matchId) {
         if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
 
         let uniqueGoalId = `${matchId}_${latestScorer}_${hScore}_${aScore}`;
 
+        // 1. Visuelle In-App Anzeige oben aktualisieren
+        let tickerBox = document.getElementById('liveGoalTickerBox');
+        let tickerText = document.getElementById('liveGoalTickerText');
+        let tickerTime = document.getElementById('liveGoalTime');
+
+        let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
+        let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
+
+        if (tickerBox && tickerText) {
+            tickerText.innerHTML = `⚽ TOR! ${home} vs ${away} — <strong>${hScore}:${aScore}</strong> (${cleanPlayer}${minStr})`;
+            if (tickerTime) tickerTime.textContent = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' Uhr';
+            tickerBox.style.display = 'block';
+        }
+
+        // 2. Ligaweiter Push-Alarm an alle abonnierten Geräte
         try {
             let { data: existing, error: checkError } = await supabaseClient
-                .from('sent_goals_freiburg')
+                .from('sent_goals_all')
                 .select('goal_id')
                 .eq('goal_id', uniqueGoalId)
                 .maybeSingle();
 
             if (!existing && !checkError) {
                 let { error: insertError } = await supabaseClient
-                    .from('sent_goals_freiburg')
+                    .from('sent_goals_all')
                     .insert([{ goal_id: uniqueGoalId }]);
 
                 if (!insertError) {
-                    let scoringTeamName = latestScorer.includes(home) ? home : away; // oder fallweise übergeben
-                    let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
-                    let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
-
                     await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
                         method: 'POST',
                         mode: 'cors',
@@ -1170,13 +1223,13 @@
                         body: JSON.stringify({
                             table: 'push_subscriptions_scf',
                             title: `⚽ TOR! (${hScore}:${aScore})`,
-                            body: `Torschütze: ${cleanPlayer}${minStr}\n(${home} vs ${away})`
+                            body: `${home} vs ${away}\nTorschütze: ${cleanPlayer}${minStr}`
                         })
                     });
                 }
             }
         } catch (e) {
-            console.error("Fehler beim Freiburg Tor-Cache:", e);
+            console.error("Fehler beim ligaweiten Tor-Cache:", e);
         }
     }
 
@@ -1322,7 +1375,8 @@
                         let prev = previousEspnScores[matchId];
                         if (prev !== undefined && isLive) {
                             if (homeScoreVal > prev.home || awayScoreVal > prev.away) {
-                                triggerGoalPush(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText, matchId);
+                                // LIGAWEITER TOR-ALARM (FÜR JEDE MANNSCHAFT)
+                                checkAllGoalsAndNotify(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText, matchId);
                             }
                         }
                         previousEspnScores[matchId] = { home: homeScoreVal, away: awayScoreVal };
