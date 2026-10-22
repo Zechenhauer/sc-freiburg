@@ -46,12 +46,12 @@
             box-shadow: 0 4px 20px rgba(227, 6, 19, 0.15);
         }
 
-        /* LIVE-TOR-TICKER (FÜR ALLE TORE) */
-        .live-goal-ticker {
+        /* LIVE-TOR-TICKER LAUFBAND (LETZTE TORE) */
+        .goal-ticker-tickerbar {
             background: linear-gradient(135deg, #2b0808 0%, #1c1111 100%);
             border: 1px solid var(--scf-bright-red);
             border-radius: 8px;
-            padding: 12px 15px;
+            padding: 10px 15px;
             margin-bottom: 15px;
             display: none;
             box-shadow: 0 4px 15px rgba(227, 6, 19, 0.3);
@@ -62,20 +62,43 @@
             50% { border-color: rgba(255, 26, 43, 1); }
             100% { border-color: rgba(255, 26, 43, 0.4); }
         }
-        .live-goal-header {
-            font-size: 0.75rem;
+        .tickerbar-header {
+            font-size: 0.72rem;
             text-transform: uppercase;
             font-weight: bold;
             color: var(--scf-bright-red);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 6px;
+            border-bottom: 1px solid rgba(227, 6, 19, 0.3);
+            padding-bottom: 4px;
         }
-        .live-goal-content {
-            font-size: 0.95rem;
-            font-weight: bold;
+        .tickerbar-items {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .tickerbar-item {
+            font-size: 0.88rem;
             color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 5px 10px;
+            border-radius: 4px;
+            border-left: 3px solid var(--scf-red);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tickerbar-item .goal-time {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin-left: auto;
         }
 
         .banner-wrapper {
@@ -638,13 +661,15 @@
 <body>
 
 <div class="container">
-    <!-- LIVE-TOR-TICKER (FÜR ALLE TORE) -->
-    <div class="live-goal-ticker" id="liveGoalTickerBox">
-        <div class="live-goal-header">
-            <span>⚽ LIVE-TOR TICKER (ALLE BUNDESLIGA-SPIELE)</span>
-            <span id="liveGoalTime" style="margin-left: auto; color: var(--text-muted); font-weight: normal;"></span>
+    <!-- LIVE-TOR-TICKER LAUFBAND (LETZTE TORE) -->
+    <div class="goal-ticker-tickerbar" id="goalTickerBar">
+        <div class="tickerbar-header">
+            <span>⚽ BUNDESLIGA LIVE-TICKER (LETZTE TORE)</span>
+            <span id="tickerBarLiveTime" style="margin-left: auto; color: var(--text-muted); font-weight: normal;"></span>
         </div>
-        <div class="live-goal-content" id="liveGoalTickerText">Warte auf Tore in der Bundesliga...</div>
+        <div class="tickerbar-items" id="tickerBarItemsContainer">
+            <!-- Tore werden hier dynamisch eingefügt -->
+        </div>
     </div>
 
     <!-- HAUPT-BANNER OBEN -->
@@ -934,6 +959,9 @@
     const ADMIN_PIN = "1904";
     let isAdmin = false;
 
+    // Tickerbar Speicher-Array initialisieren
+    let recentGoalsList = JSON.parse(localStorage.getItem('scf_recent_goals_cache') || '[]');
+
     // BESUCHER COUNTER
     function initVisitorCounter() {
         let count = parseInt(localStorage.getItem('scf_app_visitors') || '20');
@@ -1182,27 +1210,62 @@
         }
     }
 
-    // LIGAWEITE TOR-ERKENNUNG FÜR IN-APP TICKER & PUSH (FÜR JEDE MANNSCHAFT)
+    // RENDER-FUNKTION FÜR DAS LIVE-TOR-TICKER LAUFBAND
+    function renderRecentGoalsTicker() {
+        let tickerBar = document.getElementById('goalTickerBar');
+        let container = document.getElementById('tickerBarItemsContainer');
+        let timeLabel = document.getElementById('tickerBarLiveTime');
+
+        if (!tickerBar || !container) return;
+
+        if (recentGoalsList.length === 0) {
+            tickerBar.style.display = 'none';
+            return;
+        }
+
+        tickerBar.style.display = 'block';
+        container.innerHTML = '';
+
+        recentGoalsList.forEach((g, index) => {
+            let itemDiv = document.createElement('div');
+            let badgeIcon = index === 0 ? '🔥' : '⚽';
+            itemDiv.className = 'tickerbar-item';
+            itemDiv.innerHTML = `
+                <span>${badgeIcon}</span>
+                <span>${g.text}</span>
+                <span class="goal-time">${g.time}</span>
+            `;
+            container.appendChild(itemDiv);
+        });
+
+        if (timeLabel && recentGoalsList.length > 0) {
+            timeLabel.textContent = "Letztes Tor: " + recentGoalsList[0].time;
+        }
+    }
+
+    // LIGAWEITE TOR-ERKENNUNG FÜR IN-APP LAUFBAND & PUSH
     async function checkAllGoalsAndNotify(home, away, hScore, aScore, latestScorer, matchId) {
         if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
 
         let uniqueGoalId = `${matchId}_${latestScorer}_${hScore}_${aScore}`;
-
-        // 1. Visuelle In-App Anzeige oben aktualisieren
-        let tickerBox = document.getElementById('liveGoalTickerBox');
-        let tickerText = document.getElementById('liveGoalTickerText');
-        let tickerTime = document.getElementById('liveGoalTime');
-
         let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
         let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
+        let timeNow = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
-        if (tickerBox && tickerText) {
-            tickerText.innerHTML = `⚽ TOR! ${home} vs ${away} — <strong>${hScore}:${aScore}</strong> (${cleanPlayer}${minStr})`;
-            if (tickerTime) tickerTime.textContent = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' Uhr';
-            tickerBox.style.display = 'block';
+        let goalObject = {
+            id: uniqueGoalId,
+            text: `<strong>${hScore}:${aScore}</strong> — ${home} vs ${away} (${cleanPlayer}${minStr})`,
+            time: timeNow + ' Uhr'
+        };
+
+        if (!recentGoalsList.some(g => g.id === uniqueGoalId)) {
+            recentGoalsList.unshift(goalObject);
+            if (recentGoalsList.length > 3) recentGoalsList = recentGoalsList.slice(0, 3);
+            localStorage.setItem('scf_recent_goals_cache', JSON.stringify(recentGoalsList));
+            renderRecentGoalsTicker();
         }
 
-        // 2. Ligaweiter Push-Alarm an alle abonnierten Geräte
+        // Ligaweiter Push-Alarm an alle abonnierten Geräte
         try {
             let { data: existing, error: checkError } = await supabaseClient
                 .from('sent_goals_all')
@@ -1375,7 +1438,6 @@
                         let prev = previousEspnScores[matchId];
                         if (prev !== undefined && isLive) {
                             if (homeScoreVal > prev.home || awayScoreVal > prev.away) {
-                                // LIGAWEITER TOR-ALARM (FÜR JEDE MANNSCHAFT)
                                 checkAllGoalsAndNotify(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText, matchId);
                             }
                         }
@@ -1880,6 +1942,9 @@
     // INITIALISIERUNG
     initVisitorCounter();
     
+    // Tickerbar direkt beim Start aus dem localStorage laden falls vorhanden
+    renderRecentGoalsTicker();
+
     showSlide(0);
     resetTimer();
 
