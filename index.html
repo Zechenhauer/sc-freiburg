@@ -1130,8 +1130,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     table: 'push_subscriptions_scf',
-                    title: "⚽ Bundesliga Test-Tor-Alarm",
-                    body: "Das Test-Tor wurde erfolgreich ausgelöst!"
+                    title: "⚽ Bundesliga Test-Alarm",
+                    body: "Das Test-Tor für die Bundesliga wurde erfolgreich ausgelöst!"
                 })
             });
             if (response.ok) alert("Test-Push erfolgreich ausgelöst!");
@@ -1159,7 +1159,9 @@
                     .insert([{ goal_id: uniqueGoalId }]);
 
                 if (!insertError) {
-                    let bodyText = `${home} ${hScore} : ${aScore} ${away}\nTorschütze: ${latestScorer}`;
+                    let scoringTeamName = latestScorer.includes(home) ? home : away; // oder fallweise übergeben
+                    let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
+                    let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
 
                     await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
                         method: 'POST',
@@ -1167,8 +1169,8 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             table: 'push_subscriptions_scf',
-                            title: "⚽ TOR! (1. Bundesliga)",
-                            body: bodyText
+                            title: `⚽ TOR! (${hScore}:${aScore})`,
+                            body: `Torschütze: ${cleanPlayer}${minStr}\n(${home} vs ${away})`
                         })
                     });
                 }
@@ -1478,7 +1480,7 @@
             topScorersWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine Torschützen erfasst</span>';
         }
 
-        // --- FORM-KÖNIG KACHEL WIE AUF DEM FOTO ---
+        // --- FORM-KÖNIG KACHEL ---
         let formStats = {};
         let allTeams = [];
         Object.values(leagueMatches).forEach(matchList => {
