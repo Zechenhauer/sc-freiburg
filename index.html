@@ -1442,8 +1442,7 @@
                                 if (detail.penalty) notes = " (Pen)";
                                 if (detail.ownGoal) notes = " (ET)";
 
-                                let goalEntry = `⚽ ${playerName}${minuteStr}${notes}`;
-                                latestScorerText = goalEntry;
+                                let uniqueGoalId = `${matchId}_${latestScorerText}`;
 
                                 if (detail.team?.id === homeComp.team.id) {
                                     goalsHome.push(goalEntry);
