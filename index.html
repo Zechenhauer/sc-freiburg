@@ -1281,7 +1281,7 @@
     async function checkAllGoalsAndNotify(home, away, hScore, aScore, latestScorer, matchId) {
         if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
 
-        let uniqueGoalId = `${matchId}_${latestScorer}_${hScore}_${aScore}`;
+        let uniqueGoalId = `${matchId}_${latestScorer}`;
         let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
         let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
         let timeNow = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -1414,6 +1414,8 @@
                     let homeScoreVal = homeComp.score !== undefined && homeComp.score !== "" && statusType !== 'pre' ? parseInt(homeComp.score) : null;
                     let awayScoreVal = awayComp.score !== undefined && awayComp.score !== "" && statusType !== 'pre' ? parseInt(awayComp.score) : null;
                     
+                    let matchId = 'espn_' + ev.id;
+
                     if (comp.details && Array.isArray(comp.details)) {
                         comp.details.forEach(detail => {
                             let typeText = (detail.type && detail.type.text) ? detail.type.text.toLowerCase() : "";
@@ -1442,7 +1444,11 @@
                                 if (detail.penalty) notes = " (Pen)";
                                 if (detail.ownGoal) notes = " (ET)";
 
-                                let uniqueGoalId = `${matchId}_${latestScorerText}`;
+                                let goalEntry = `⚽ ${playerName}${minuteStr}${notes}`;
+                                latestScorerText = goalEntry;
+
+                                // Felsenfest eindeutige ID (ohne Spielstand)
+                                let uniqueGoalId = `${matchId}_${playerName}_${clock}`;
 
                                 if (detail.team?.id === homeComp.team.id) {
                                     goalsHome.push(goalEntry);
@@ -1465,7 +1471,6 @@
                         });
                     }
 
-                    let matchId = 'espn_' + ev.id;
                     if (homeScoreVal !== null && awayScoreVal !== null) {
                         let prev = previousEspnScores[matchId];
                         if (prev !== undefined && isLive) {
