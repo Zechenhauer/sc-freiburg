@@ -46,7 +46,7 @@
             box-shadow: 0 4px 20px rgba(227, 6, 19, 0.15);
         }
 
-        /* NEUES PERFEKTES LAUFBAND (Übernommen von Rom-App) */
+        /* PERFEKTES LAUFBAND */
         @keyframes ticker {
             0% { transform: translate3d(0, 0, 0); }
             100% { transform: translate3d(-50%, 0, 0); }
@@ -640,7 +640,7 @@
 <body>
 
 <div class="container">
-    <!-- LIVE-TOR-TICKER LAUFBAND (DESIGN WIE ROM-APP) -->
+    <!-- LIVE-TOR-TICKER LAUFBAND -->
     <div class="ticker-wrap" id="goalTickerBar">
         <div class="ticker-move" id="tickerBarItemsContainer">
             <span class="ticker-item text-slate-400">Lade Live-Ticker der Bundesliga...</span>
@@ -1198,7 +1198,7 @@
         }
 
         let htmlItems = '';
-        let loopMatches = [...matches, ...matches]; // Für nahtlosen Loop
+        let loopMatches = [...matches, ...matches];
 
         loopMatches.forEach(m => {
             let hasResult = m.homeScore !== null && m.homeScore !== undefined;
@@ -1247,15 +1247,16 @@
         }
 
         try {
+            // ANGEPASST AUF EURE EIGENE TABELLE: send_goals_freiburg
             let { data: existing, error: checkError } = await supabaseClient
-                .from('sent_goals_all')
+                .from('send_goals_freiburg')
                 .select('goal_id')
                 .eq('goal_id', uniqueGoalId)
                 .maybeSingle();
 
             if (!existing && !checkError) {
                 let { error: insertError } = await supabaseClient
-                    .from('sent_goals_all')
+                    .from('send_goals_freiburg')
                     .insert([{ goal_id: uniqueGoalId }]);
 
                 if (!insertError) {
@@ -1272,7 +1273,7 @@
                 }
             }
         } catch (e) {
-            console.error("Fehler beim ligaweiten Tor-Cache:", e);
+            console.error("Fehler beim Freiburg Tor-Cache:", e);
         }
     }
 
@@ -1524,7 +1525,6 @@
             lastWidget.innerHTML = "Noch kein beendetes Spiel.";
         }
 
-        // --- FORMVERLAUF ---
         let formWidget = document.getElementById('formCurveWidget');
         if (pastMatches.length > 0) {
             let last15 = pastMatches.slice(-15);
@@ -1541,7 +1541,6 @@
             formWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine beendeten Spiele</span>';
         }
 
-        // --- TOP 3 TORSCHÜTZEN ---
         let scfScorersMap = {};
         pastMatches.forEach(m => {
             let parseScorers = (gList, teamName) => {
@@ -1578,7 +1577,6 @@
             topScorersWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine Torschützen erfasst</span>';
         }
 
-        // --- FORM-KÖNIG KACHEL ---
         let formStats = {};
         let allTeams = [];
         Object.values(leagueMatches).forEach(matchList => {
