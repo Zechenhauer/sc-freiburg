@@ -1221,7 +1221,7 @@
         }
     }
 
-    // RENDER-FUNKTION FÜR DAS LIVE-TOR-TICKER LAUFBAND (MIT FALLBACK AUF LETZTEN SPIELTAG & FREIBURG-FÄRBUNG)
+    // RENDER-FUNKTION FÜR DAS LIVE-TOR-TICKER LAUFBAND
     function renderRecentGoalsTicker() {
         let tickerBar = document.getElementById('goalTickerBar');
         let container = document.getElementById('tickerBarItemsContainer');
@@ -1245,7 +1245,6 @@
             titleLabel.textContent = "🟢 LIVE-TORE";
             itemsToDisplay = recentGoalsList.map(g => `<span class="tickerbar-item"><span class="ticker-match-box">${g.text} <span style="color:var(--text-muted); margin-left:8px; font-size:0.75rem;">(${g.time})</span></span></span>`);
         } else {
-            // Fallback: Letzter Spieltag mit Ergebnissen
             let lastValidMatchday = currentMatchday;
             let foundMatches = [];
             for (let s = currentMatchday; s >= 1; s--) {
@@ -1277,11 +1276,13 @@
         container.innerHTML = itemsToDisplay.join('');
     }
 
-    // LIGAWEITE TOR-ERKENNUNG FÜR IN-APP LAUFBAND & PUSH
+    // AKTUALISIERT: LIGAWEITE TOR-ERKENNUNG MIT SPIELSTAND IN DER ID (VERHINDERT DAS VERSCHLUCKEN VON TOREN)
     async function checkAllGoalsAndNotify(home, away, hScore, aScore, latestScorer, matchId) {
         if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
 
-        let uniqueGoalId = `${matchId}_${latestScorer}`;
+        // Felsenfest eindeutige ID inklusive des aktuellen Spielstands
+        let uniqueGoalId = `${matchId}_${hScore}:${aScore}_${latestScorer}`;
+        
         let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
         let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
         let timeNow = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -1446,9 +1447,6 @@
 
                                 let goalEntry = `⚽ ${playerName}${minuteStr}${notes}`;
                                 latestScorerText = goalEntry;
-
-                                // Felsenfest eindeutige ID (ohne Spielstand)
-                                let uniqueGoalId = `${matchId}_${playerName}_${clock}`;
 
                                 if (detail.team?.id === homeComp.team.id) {
                                     goalsHome.push(goalEntry);
