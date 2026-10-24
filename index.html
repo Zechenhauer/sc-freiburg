@@ -46,72 +46,37 @@
             box-shadow: 0 4px 20px rgba(227, 6, 19, 0.15);
         }
 
-        /* LIVE-TOR-TICKER LAUFBAND (LETZTE TORE / LETZTER SPIELTAG) */
-        .goal-ticker-tickerbar {
+        /* NEUES PERFEKTES LAUFBAND (Übernommen von Rom-App) */
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+        .ticker-wrap {
             width: 100%;
+            overflow: hidden;
             background: #000000;
             border: 1px solid var(--scf-red);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            height: 38px;
-            position: relative;
-            box-shadow: 0 0 10px rgba(227, 6, 19, 0.2);
-        }
-        .tickerbar-label {
-            background: var(--scf-red);
-            color: #ffffff;
-            font-size: 0.72rem;
-            font-weight: bold;
-            padding: 0 12px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            z-index: 2;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .tickerbar-content-box {
-            overflow: hidden;
+            border-radius: 12px;
+            padding: 10px 0;
             white-space: nowrap;
-            flex: 1;
-            position: relative;
+            margin-bottom: 24px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
+            display: none;
         }
-        .tickerbar-track {
+        .ticker-move {
             display: inline-block;
-            white-space: nowrap;
-            animation: ticker-scroll 95s linear infinite;
-            font-size: 0.88rem;
-            color: #ffffff;
-            font-weight: 500;
+            animation: ticker 35s linear infinite;
         }
-        .tickerbar-track:hover {
+        .ticker-move:hover {
             animation-play-state: paused;
         }
-        .tickerbar-item {
-            display: inline-block;
-            padding: 0 25px;
-        }
-        .ticker-match-box {
+        .ticker-item {
             display: inline-flex;
             align-items: center;
-            background: rgba(227, 6, 19, 0.1);
-            border: 1px solid rgba(227, 6, 19, 0.3);
-            padding: 4px 12px;
-            border-radius: 4px;
-            margin: 0 5px;
-            color: #ffffff;
-        }
-        .ticker-match-box.scf-team-ticker {
-            background: rgba(227, 6, 19, 0.3);
-            border: 1px solid var(--scf-bright-red);
-            font-weight: bold;
-        }
-        @keyframes ticker-scroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
+            gap: 10px;
+            padding: 0 25px;
+            font-size: 0.85rem;
+            border-right: 1px solid var(--border-color);
         }
 
         .banner-wrapper {
@@ -318,6 +283,7 @@
             background-color: var(--scf-red);
             border-radius: 50%;
             animation: pulse-red 1.2s infinite;
+            display: inline-block;
         }
 
         .section-box {
@@ -595,8 +561,8 @@
         }
         .team-cell.right { justify-content: flex-end; }
         .team-mini-logo {
-            width: 22px;
-            height: 22px;
+            width: 26px;
+            height: 26px;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -674,13 +640,10 @@
 <body>
 
 <div class="container">
-    <!-- LIVE-TOR-TICKER LAUFBAND -->
-    <div class="goal-ticker-tickerbar" id="goalTickerBar" style="display: none;">
-        <div class="tickerbar-label" id="tickerBarTitleLabel">🟢 Live-Ticker</div>
-        <div class="tickerbar-content-box">
-            <div class="tickerbar-track" id="tickerBarItemsContainer">
-                <!-- Ticker-Inhalte werden dynamisch befüllt -->
-            </div>
+    <!-- LIVE-TOR-TICKER LAUFBAND (DESIGN WIE ROM-APP) -->
+    <div class="ticker-wrap" id="goalTickerBar">
+        <div class="ticker-move" id="tickerBarItemsContainer">
+            <span class="ticker-item text-slate-400">Lade Live-Ticker der Bundesliga...</span>
         </div>
     </div>
 
@@ -1221,76 +1184,59 @@
         }
     }
 
-    // RENDER-FUNKTION FÜR DAS LIVE-TOR-TICKER LAUFBAND
+    // RENDER-FUNKTION FÜR DAS PERFEKTE LAUFBAND
     function renderRecentGoalsTicker() {
         let tickerBar = document.getElementById('goalTickerBar');
         let container = document.getElementById('tickerBarItemsContainer');
-        let titleLabel = document.getElementById('tickerBarTitleLabel');
 
         if (!tickerBar || !container) return;
 
-        let hasLive = false;
-        if (leagueMatches) {
-            for (let s in leagueMatches) {
-                if (leagueMatches[s].some(m => m.isLive)) {
-                    hasLive = true;
-                    break;
-                }
-            }
-        }
-
-        let itemsToDisplay = [];
-
-        if (recentGoalsList.length > 0 && hasLive) {
-            titleLabel.textContent = "🟢 LIVE-TORE";
-            itemsToDisplay = recentGoalsList.map(g => `<span class="tickerbar-item"><span class="ticker-match-box">${g.text} <span style="color:var(--text-muted); margin-left:8px; font-size:0.75rem;">(${g.time})</span></span></span>`);
-        } else {
-            let lastValidMatchday = currentMatchday;
-            let foundMatches = [];
-            for (let s = currentMatchday; s >= 1; s--) {
-                if (leagueMatches[s] && leagueMatches[s].some(m => m.homeScore !== null && m.homeScore !== undefined)) {
-                    lastValidMatchday = s;
-                    foundMatches = leagueMatches[s];
-                    break;
-                }
-            }
-            if (foundMatches.length === 0 && leagueMatches[1]) {
-                foundMatches = leagueMatches[1];
-            }
-
-            titleLabel.textContent = `⚽ SPIELTAG ${lastValidMatchday} (ERGEBNISSE)`;
-            itemsToDisplay = foundMatches.map(m => {
-                let isScf = m.home.toLowerCase().includes('freiburg') || m.away.toLowerCase().includes('freiburg');
-                let boxClass = isScf ? "ticker-match-box scf-team-ticker" : "ticker-match-box";
-                let scoreStr = (m.homeScore !== null && m.homeScore !== undefined) ? `${m.homeScore}:${m.awayScore}` : 'vs';
-                return `<span class="tickerbar-item"><span class="${boxClass}"><strong>${m.home}</strong> <span style="color:#ffffff; margin:0 6px;">${scoreStr}</span> <strong>${m.away}</strong></span></span>`;
-            });
-        }
-
-        if (itemsToDisplay.length === 0) {
+        let matches = leagueMatches[currentMatchday] || [];
+        if (matches.length === 0) {
             tickerBar.style.display = 'none';
             return;
         }
 
-        tickerBar.style.display = 'flex';
-        container.innerHTML = itemsToDisplay.join('');
+        let htmlItems = '';
+        let loopMatches = [...matches, ...matches]; // Für nahtlosen Loop
+
+        loopMatches.forEach(m => {
+            let hasResult = m.homeScore !== null && m.homeScore !== undefined;
+            let scoreText = hasResult ? `${m.homeScore}:${m.awayScore}` : m.time;
+            let statusStyle = m.isLive ? 'color: #f87171; font-weight: bold;' : 'color: #fff;';
+            let isScf = m.home.toLowerCase().includes('freiburg') || m.away.toLowerCase().includes('freiburg');
+            let highlightStyle = isScf ? 'border-left: 3px solid var(--scf-red); padding-left: 10px;' : '';
+
+            let homeLogoUrl = teamLogos[m.home.trim().toLowerCase()] || '';
+            let awayLogoUrl = teamLogos[m.away.trim().toLowerCase()] || '';
+
+            htmlItems += `
+                <div class="ticker-item" style="${highlightStyle}">
+                    ${homeLogoUrl ? `<img src="${homeLogoUrl}" class="team-mini-logo" alt="">` : ''}
+                    <span style="${m.home.toLowerCase().includes('freiburg') ? 'color: var(--scf-bright-red); font-weight:bold;' : 'color:#cbd5e1;'}">${m.home}</span>
+                    <span style="font-weight:900; ${statusStyle}">${scoreText}</span>
+                    <span style="${m.away.toLowerCase().includes('freiburg') ? 'color: var(--scf-bright-red); font-weight:bold;' : 'color:#cbd5e1;'}">${m.away}</span>
+                    ${awayLogoUrl ? `<img src="${awayLogoUrl}" class="team-mini-logo" alt="">` : ''}
+                    ${m.isLive ? '<span class="live-dot ml-1"></span>' : ''}
+                </div>
+            `;
+        });
+
+        container.innerHTML = htmlItems;
+        tickerBar.style.display = 'block';
     }
 
-    // AKTUALISIERT: LIGAWEITE TOR-ERKENNUNG MIT SPIELSTAND IN DER ID (VERHINDERT DAS VERSCHLUCKEN VON TOREN)
     async function checkAllGoalsAndNotify(home, away, hScore, aScore, latestScorer, matchId) {
         if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
 
-        // Felsenfest eindeutige ID inklusive des aktuellen Spielstands
         let uniqueGoalId = `${matchId}_${hScore}:${aScore}_${latestScorer}`;
         
         let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
         let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
-        let timeNow = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
         let goalObject = {
             id: uniqueGoalId,
-            text: `<strong>${hScore}:${aScore}</strong> — ${home} vs ${away} (${cleanPlayer}${minStr})`,
-            time: timeNow + ' Uhr'
+            text: `<strong>${hScore}:${aScore}</strong> — ${home} vs ${away} (${cleanPlayer}${minStr})`
         };
 
         if (!recentGoalsList.some(g => g.id === uniqueGoalId)) {
@@ -1427,7 +1373,7 @@
                                 || "";
 
                             if (!playerName && detail.text) {
-                                let cleanText = detail.text.replace(/scored.*\$/, '').trim();
+                                let cleanText = detail.text.replace(/scored.*$/, '').trim();
                                 if (cleanText && cleanText.toLowerCase() !== 'goal') {
                                     playerName = cleanText;
                                 }
@@ -1978,8 +1924,6 @@
     // INITIALISIERUNG
     initVisitorCounter();
     
-    renderRecentGoalsTicker();
-
     showSlide(0);
     resetTimer();
 
