@@ -665,7 +665,7 @@
     <div class="subtitle" id="leagueSubtitle">1. Bundesliga — Saison 2026/27 (Mit ESPN Live-Sync)</div>
     <div class="meta-info">
         <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
-        <span class="supabase-badge" id="cloudStatusBadge">● ESPN Live-Ticker Aktiv</span>
+        <span class="supabase-badge" id="cloudStatusBadge">● Push & Live-Sync Aktiv</span>
         <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIEL LÄUFT</div>
     </div>
 
@@ -1107,6 +1107,7 @@
     let isInitialized = false;
     let nextMatchDateTime = null;
     let previousEspnScores = {};
+    let pushedUpcomingMatchdayKeys = new Set();
 
     const matchdayFridays = {
         1: "2026-08-28", 2: "2026-09-04", 3: "2026-09-11", 4: "2026-09-18", 5: "2026-10-09",
@@ -1273,6 +1274,50 @@
             }
         } catch (e) {
             console.error("Fehler beim Freiburg Tor-Cache:", e);
+        }
+    }
+
+    // 15-Minuten-Vorwarnungs-Push
+    function checkUpcomingMatchdayPush() {
+        let now = new Date();
+
+        for (let mDay in leagueMatches) {
+            let matches = leagueMatches[mDay];
+            if (!Array.isArray(matches)) continue;
+
+            matches.forEach(m => {
+                if (!m.dateTime) return;
+
+                let matchTime = new Date(m.dateTime);
+                let diffMs = matchTime - now;
+                let diffMinutes = Math.round(diffMs / 60000);
+
+                if (diffMinutes >= 14 && diffMinutes <= 16) {
+                    let uniquePushKey = `upcoming_15min_scf_${m.matchday || mDay}_${m.home}_${m.away}`;
+
+                    if (!pushedUpcomingMatchdayKeys.has(uniquePushKey)) {
+                        pushedUpcomingMatchdayKeys.add(uniquePushKey);
+                        sendAutomatedUpcomingPush();
+                    }
+                }
+            });
+        }
+    }
+
+    async function sendAutomatedUpcomingPush() {
+        try {
+            await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+                method: 'POST',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    table: 'push_subscriptions_scf',
+                    title: '⚽ Bundesliga-Hinweis',
+                    body: 'Live Spiele in der 1. Liga stehen an'
+                })
+            });
+        } catch (e) {
+            console.error("Fehler beim Senden des Vorwarnungs-Push:", e);
         }
     }
 
@@ -1468,6 +1513,7 @@
         }
 
         renderAll();
+        checkUpcomingMatchdayPush();
     }
 
     function changeMatchday(amount) {
@@ -1911,6 +1957,39 @@
         `;
     }
 
+    // --- Intelligentes Polling (Schont API, wenn kein Spiel live ist) ---
+    let currentIntervalTime = 30000;
+    let mainIntervalHandle = null;
+
+    function setupSmartPolling() {
+        if (mainIntervalHandle) clearInterval(mainIntervalHandle);
+
+        mainIntervalHandle = setInterval(() => {
+            if (!isAdmin) {
+                let hasActiveLiveMatch = false;
+                for (let mDay in leagueMatches) {
+                    let matches = leagueMatches[mDay];
+                    if (Array.isArray(matches)) {
+                        if (matches.some(m => m.isLive)) {
+                            hasActiveLiveMatch = true;
+                            break;
+                        }
+                    }
+                }
+
+                let targetInterval = hasActiveLiveMatch ? 30000 : 600000; // 30 Sek bei Live, 10 Min sonst
+
+                if (currentIntervalTime !== targetInterval) {
+                    currentIntervalTime = targetInterval;
+                    setupSmartPolling();
+                    return;
+                }
+
+                loadEspnMatchdayData();
+            }
+        }, currentIntervalTime);
+    }
+
     window.onclick = function(e) {
         if (e.target === document.getElementById('scfMatchesModal')) closeScfMatchesModal();
         if (e.target === document.getElementById('leagueScorersModal')) closeLeagueScorersModal();
@@ -1927,14 +2006,9 @@
     showKaderSlide(0);
     resetKaderTimer();
 
-    loadEspnMatchdayData();
-
-    // LIVE-AKTUALISIERUNG ALLE 30 SEKUNDEN
-    setInterval(() => {
-        if (!isAdmin) {
-            loadEspnMatchdayData();
-        }
-    }, 30000);
+    loadEspnMatchdayData().then(() => {
+        setupSmartPolling();
+    });
 </script>
 
 </body>
