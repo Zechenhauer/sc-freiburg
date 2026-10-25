@@ -1,6 +1,10 @@
-// Service Worker mit personalisiertem "JS"-Icon für die Push-Benachrichtigungen
+// Sauberer Service Worker für Push-Benachrichtigungen
 self.addEventListener('push', function(event) {
-    let data = { title: '⚽ Fußball-Alarm', body: 'Es gibt ein neues Update!' };
+    let data = { 
+        title: '⚽ Bundesliga-Alarm', 
+        body: 'Es gibt ein neues Update!' 
+    };
+
     if (event.data) {
         try {
             data = event.data.json();
@@ -11,9 +15,8 @@ self.addEventListener('push', function(event) {
 
     const options = {
         body: data.body,
-        // Generiert ein sauberes Icon mit deinen Initialen JS
-        icon: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="12" fill="%231f242d"/><text x="32" y="42" font-size="28" font-weight="bold" fill="%23f0f6fc" text-anchor="middle" font-family="sans-serif">JS</text></svg>',
-        badge: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="12" fill="%231f242d"/><text x="32" y="42" font-size="28" font-weight="bold" fill="%23f0f6fc" text-anchor="middle" font-family="sans-serif">JS</text></svg>',
+        icon: 'https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png',
+        badge: 'https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png',
         vibrate: [200, 100, 200]
     };
 
