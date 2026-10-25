@@ -658,9 +658,9 @@
     </div>
 
     <div class="title-row">
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
+        <img src="https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
         <h2>SC <span>Freiburg</span></h2>
-        <img src="https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
+        <img src="https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
     </div>
     <div class="subtitle" id="leagueSubtitle">1. Bundesliga — Saison 2026/27 (Mit ESPN Live-Sync)</div>
     <div class="meta-info">
@@ -947,12 +947,12 @@
         document.getElementById('visitorCountDisplay').textContent = count.toLocaleString('de-DE');
     }
 
-    // 1. HAUPT-BANNER DIASHOW (Oben)
+    // 1. HAUPT-BANNER DIASHOW (GitHub Raw Pfade)
     const slides = [
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20fans.jpg", name: "SC Freiburg Fans" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20fans01.jpg", name: "Fankurve & Stimmung" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20stadion.png", name: "Europa-Park Stadion" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/vereinslogos/freiburg%20team.png", name: "Mannschaft" }
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20fans.jpg", name: "SC Freiburg Fans" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20fans01.jpg", name: "Fankurve & Stimmung" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20stadion.png", name: "Europa-Park Stadion" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20team.png", name: "Mannschaft" }
     ];
     let currentSlideIndex = 0;
     let slideInterval;
@@ -981,17 +981,17 @@
         slideInterval = setInterval(() => { showSlide(currentSlideIndex + 1); }, 5000);
     }
 
-    // 2. KADER-DIASHOW
+    // 2. KADER-DIASHOW (GitHub Raw Pfade)
     const kaderSlides = [
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Trainer.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Tor.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Abwehr.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Abwehr01.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Mittelfeld.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Mittelfeld01.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Angriff.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Gemischt.png" },
-        { url: "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/freiburg/Gemischt01.png" }
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Trainer.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Tor.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Abwehr.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Abwehr01.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Mittelfeld.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Mittelfeld01.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Angriff.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Gemischt.png" },
+        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Gemischt01.png" }
     ];
     let currentKaderIndex = 0;
     let kaderInterval;
@@ -1247,7 +1247,6 @@
         }
 
         try {
-            // ANGEPASST AUF EURE EIGENE TABELLE: send_goals_freiburg
             let { data: existing, error: checkError } = await supabaseClient
                 .from('send_goals_freiburg')
                 .select('goal_id')
