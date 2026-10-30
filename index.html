@@ -264,7 +264,7 @@
             </div>
         </div>
 
-        <!-- Infokacheln (Genau 8 Kacheln: 2 Reihen à 4 Kacheln) -->
+        <!-- Infokacheln -->
         <div class="dashboard-grid">
             <!-- Kachel 1: Nächstes Spiel -->
             <div class="dash-card">
@@ -276,7 +276,7 @@
                 </div>
             </div>
 
-            <!-- Kachel 2: Letztes Pflichtspiel (Reine Infokachel ohne Popup) -->
+            <!-- Kachel 2: Letztes Pflichtspiel -->
             <div class="dash-card">
                 <div class="dash-card-title">🏁 Letztes Pflichtspiel</div>
                 <div id="lastMatchWidget" style="font-size: 0.82rem; display: flex; flex-direction: column; gap: 4px;">
@@ -294,19 +294,19 @@
                 <div id="top3TableWidget">Wird berechnet...</div>
             </div>
 
-            <!-- Kachel 4: Top-Torschützen (mit Spielerbildern) -->
+            <!-- Kachel 4: Top-Torschützen -->
             <div class="dash-card" onclick="openTopScorersModal()" title="Klicken für komplette Torschützenliste">
                 <div class="dash-card-title">⚽ Top-Torschützen <span>🔍 Alle</span></div>
                 <div id="topScorersWidget">Lade Torschützen...</div>
             </div>
 
-            <!-- Kachel 5: Top-Vorlagen (mit Spielerbildern) -->
+            <!-- Kachel 5: Top-Vorlagen -->
             <div class="dash-card" onclick="openTopAssistsModal()" title="Klicken für Vorlagen-Bestenliste">
                 <div class="dash-card-title">🎯 Top-Vorlagen <span>🔍 Alle</span></div>
                 <div id="topAssistsWidget">Lade Vorlagen...</div>
             </div>
 
-            <!-- Kachel 6: Gelbe / Rote Karten (mit Spielerbildern) -->
+            <!-- Kachel 6: Gelbe / Rote Karten -->
             <div class="dash-card" onclick="openYellowCardsModal()" title="Klicken für Karten-Bestenliste">
                 <div class="dash-card-title">🟨 Gelbe / Rote Karten <span>🔍 Alle</span></div>
                 <div id="yellowCardsWidget">Lade Karten...</div>
@@ -437,6 +437,7 @@
         let globalYellowCards = [];
         let previousScores = {};
         let smartPollingInterval = null;
+        let recentGoalsList = JSON.parse(localStorage.getItem('scf_recent_goals_cache') || '[]');
 
         // COUNTDOWN TIMER FÜR NÄCHSTES SPIEL
         const nextMatchDate = new Date("2026-10-31T18:30:00").getTime();
@@ -668,6 +669,55 @@
             } catch (error) {
                 console.error('Fehler bei der Push-Registrierung:', error);
                 alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
+            }
+        }
+
+        async function checkAllGoalsAndNotify(home, away, hScore, aScore, latestScorer, matchId) {
+            if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
+
+            let uniqueGoalId = `scf_${matchId}_${hScore}:${aScore}_${latestScorer}`;
+            
+            let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
+            let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
+
+            let goalObject = {
+                id: uniqueGoalId,
+                text: `<strong>${hScore}:${aScore}</strong> — ${home} vs ${away} (${cleanPlayer}${minStr})`
+            };
+
+            if (!recentGoalsList.some(g => g.id === uniqueGoalId)) {
+                recentGoalsList.unshift(goalObject);
+                if (recentGoalsList.length > 5) recentGoalsList = recentGoalsList.slice(0, 5);
+                localStorage.setItem('scf_recent_goals_cache', JSON.stringify(recentGoalsList));
+            }
+
+            try {
+                let { data: existing, error: checkError } = await supabaseClient
+                    .from('sent_goals_freiburg')
+                    .select('goal_id')
+                    .eq('goal_id', uniqueGoalId)
+                    .maybeSingle();
+
+                if (!existing && !checkError) {
+                    let { error: insertError } = await supabaseClient
+                        .from('sent_goals_freiburg')
+                        .insert([{ goal_id: uniqueGoalId }]);
+
+                    if (!insertError) {
+                        await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+                            method: 'POST',
+                            mode: 'cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                table: 'push_subscriptions_scf',
+                                title: `⚽ SC Freiburg Tor! (${hScore}:${aScore})`,
+                                body: `${home} vs ${away}\nTorschütze: ${cleanPlayer}${minStr}`
+                            })
+                        });
+                    }
+                }
+            } catch (e) {
+                console.error("Fehler beim SC Freiburg Tor-Cache & Push:", e);
             }
         }
 
@@ -1001,7 +1051,11 @@
                             if (goalsHome > previousScores[fixtureId].home || goalsAway > previousScores[fixtureId].away) {
                                 let scoringTeam = goalsHome > previousScores[fixtureId].home ? home.name : away.name;
                                 let latestGoal = events.filter(ev => ev.type === 'Goal').pop();
+                                let scorerText = latestGoal ? `⚽ ${latestGoal.player.name} (${latestGoal.time.elapsed}')` : "⚽ Tor";
+                                
                                 showGoalAlert(scoringTeam, latestGoal ? `${latestGoal.player.name} (${latestGoal.time.elapsed}. Min)` : "Tor", `${home.name} - ${away.name}`);
+                                
+                                checkAllGoalsAndNotify(home.name, away.name, goalsHome, goalsAway, scorerText, fixtureId);
                             }
                         }
                         previousScores[fixtureId] = { home: goalsHome, away: goalsAway };
