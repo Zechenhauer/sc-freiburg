@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SC Freiburg — 1. Bundesliga</title>
+    <title>SC Freiburg — 1. Bundesliga PRO Dashboard</title>
     
     <!-- Perfektes Inline-SVG Icon für den Homescreen -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%23e30613%22/><text x=%2250%22 y=%2270%22 font-size=%2260%22 text-anchor=%22middle%22>⚽</text></svg>">
@@ -15,6 +15,7 @@
         :root {
             --bg-color: #120a0a;
             --card-bg: #1c1111;
+            --card-hover: #261717;
             --text-color: #f0f6fc;
             --text-muted: #8b949e;
             --border-color: #3d2222;
@@ -22,12 +23,11 @@
             --scf-dark: #000000;
             --scf-dark-card: #170d0d;
             --scf-bright-red: #ff1a2b;
-            --scf-gold: #ffffff;
+            --live-red: #ff3333;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -39,46 +39,28 @@
         .container {
             width: 100%;
             max-width: 1000px;
-            background: var(--card-bg);
-            border: 1px solid rgba(227, 6, 19, 0.4);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 20px rgba(227, 6, 19, 0.15);
         }
+
+        /* LIVE TOR-ALARM POPUP BANNER */
+        #goalAlertBanner { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #1c1111, #301114); border: 2px solid var(--scf-bright-red); box-shadow: 0 10px 30px rgba(227,6,19,0.4); border-radius: 14px; padding: 18px 24px; z-index: 2000; width: 90%; max-width: 480px; text-align: center; animation: bounce-in 0.5s ease; cursor: pointer; }
+        @keyframes bounce-in { 0% { transform: translate(-50%, -30px); opacity: 0; } 100% { transform: translate(-50%, 0); opacity: 1; } }
+        .goal-alert-title { font-size: 1.2rem; font-weight: 900; color: var(--scf-bright-red); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .goal-alert-scorer { font-size: 1rem; font-weight: bold; margin-bottom: 8px; color: #fff; }
+        .goal-alert-match { font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 6px; }
 
         /* PERFEKTES LAUFBAND */
-        @keyframes ticker {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-50%, 0, 0); }
-        }
-        .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
-            background: #000000;
-            border: 1px solid var(--scf-red);
-            border-radius: 12px;
-            padding: 10px 0;
-            white-space: nowrap;
-            margin-bottom: 24px;
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5);
-            display: none;
-        }
-        .ticker-move {
-            display: inline-block;
-            animation: ticker 35s linear infinite;
-        }
-        .ticker-move:hover {
-            animation-play-state: paused;
-        }
-        .ticker-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0 25px;
-            font-size: 0.85rem;
-            border-right: 1px solid var(--border-color);
-        }
+        .ticker-wrapper { width: 100%; background: #000000; border: 1px solid var(--scf-red); border-radius: 12px; overflow: hidden; margin-bottom: 20px; display: flex; align-items: center; height: 48px; position: relative; box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); }
+        .ticker-label { background: var(--scf-red); color: #fff; font-size: 0.75rem; font-weight: bold; padding: 0 14px; height: 100%; display: flex; align-items: center; z-index: 3; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; box-shadow: 4px 0 10px rgba(0,0,0,0.5); }
+        .ticker-content-box { overflow: hidden; white-space: nowrap; flex: 1; position: relative; display: flex; align-items: center; }
+        .ticker-track { display: flex; white-space: nowrap; will-change: transform; animation: ticker-scroll 35s linear infinite; }
+        .ticker-track:hover { animation-play-state: paused; }
+        .ticker-item { display: inline-flex; align-items: center; background: #170d0d; border: 1px solid var(--border-color); padding: 6px 14px; margin: 0 6px; border-radius: 8px; color: #ffffff; font-size: 0.82rem; font-weight: 500; gap: 10px; }
+        .ticker-item.scf-ticker { background: rgba(227, 6, 19, 0.25) !important; border-color: var(--scf-red); }
+        .ticker-team-logo { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; }
+        .ticker-score { color: #ffffff; font-weight: bold; font-size: 0.9rem; background: #241414; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-color); }
+        @keyframes ticker-scroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
 
+        /* BANNER & DIASHOW */
         .banner-wrapper {
             width: 100%;
             display: flex;
@@ -92,7 +74,6 @@
             box-shadow: 0 4px 15px rgba(227, 6, 19, 0.2);
             position: relative;
         }
-
         .slideshow-container {
             position: relative;
             width: 100%;
@@ -104,39 +85,9 @@
             align-items: center;
             justify-content: center;
         }
-
-        .slide-img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .slide-caption {
-            margin-top: 8px;
-            font-size: 0.95rem;
-            color: #ffffff;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .slide-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: #ffffff;
-            border: 1px solid var(--scf-red);
-            padding: 10px 14px;
-            cursor: pointer;
-            font-size: 1rem;
-            border-radius: 4px;
-            transition: background 0.2s;
-            z-index: 10;
-        }
+        .slide-img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; margin: 0 auto; transition: opacity 0.5s ease-in-out; }
+        .slide-caption { margin-top: 8px; font-size: 0.95rem; color: #ffffff; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .slide-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.8); color: #ffffff; border: 1px solid var(--scf-red); padding: 10px 14px; cursor: pointer; font-size: 1rem; border-radius: 4px; transition: background 0.2s; z-index: 10; }
         .slide-btn:hover { background: var(--scf-red); color: #fff; }
         .slide-prev { left: 10px; }
         .slide-next { right: 10px; }
@@ -150,1866 +101,1095 @@
             box-shadow: 0 4px 15px rgba(227, 6, 19, 0.2);
             overflow: hidden;
         }
-        .kader-diashow-header {
-            background-color: var(--scf-red);
-            color: #ffffff;
-            padding: 10px 15px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .kader-diashow-body {
-            position: relative;
-            padding: 15px;
-            background: linear-gradient(135deg, #1c1111 0%, #0a0404 100%);
-            border: 1px solid rgba(227, 6, 19, 0.3);
-            border-radius: 6px;
-            margin: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 340px;
-            overflow: hidden;
-        }
-        .kader-slide-img {
-            max-width: 100%;
-            max-height: 320px;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
-            transition: opacity 0.4s ease-in-out;
-        }
-        .kader-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: #ffffff;
-            border: 1px solid var(--scf-red);
-            padding: 10px 14px;
-            cursor: pointer;
-            font-size: 1rem;
-            border-radius: 4px;
-            z-index: 10;
-            transition: background 0.2s;
-        }
+        .kader-diashow-header { background-color: var(--scf-red); color: #ffffff; padding: 10px 15px; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kader-diashow-body { position: relative; padding: 15px; background: linear-gradient(135deg, #1c1111 0%, #0a0404 100%); border: 1px solid rgba(227, 6, 19, 0.3); border-radius: 6px; margin: 10px; display: flex; align-items: center; justify-content: center; min-height: 340px; overflow: hidden; }
+        .kader-slide-img { max-width: 100%; max-height: 320px; object-fit: contain; display: block; margin: 0 auto; transition: opacity 0.4s ease-in-out; }
+        .kader-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.85); color: #ffffff; border: 1px solid var(--scf-red); padding: 10px 14px; cursor: pointer; font-size: 1rem; border-radius: 4px; z-index: 10; transition: background 0.2s; }
         .kader-btn:hover { background: var(--scf-red); }
         .kader-prev { left: 15px; }
         .kader-next { right: 15px; }
 
-        .title-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 5px;
-        }
-
-        .header-logo {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            object-fit: contain;
-            border: 2px solid var(--scf-red);
-            background: #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            padding: 2px;
-            box-sizing: border-box;
-            flex-shrink: 0;
-        }
-
-        h2 {
-            text-align: center;
-            margin: 0;
-            color: #ffffff;
-            font-size: 1.6rem;
-            font-weight: 800;
-        }
+        .title-row { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px; }
+        .header-logo { width: 55px; height: 55px; border-radius: 50%; object-fit: contain; border: 2px solid var(--scf-red); background: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.4); padding: 2px; box-sizing: border-box; flex-shrink: 0; }
+        h2 { text-align: center; margin: 0; color: #ffffff; font-size: 1.6rem; font-weight: 800; }
         h2 span { color: var(--scf-red); }
+        .subtitle { text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; font-weight: bold; }
+        .meta-info { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 15px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .supabase-badge { color: #3fb950; background: rgba(46, 160, 67, 0.15); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(46, 160, 67, 0.3); font-weight: 600; }
 
-        .subtitle {
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
+        .status-box { background: #1c1111; border: 1px solid var(--scf-red); padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
 
-        .meta-info {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        /* DASHBOARD GRID - Text beginnt direkt oben unter der Überschrift */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .dash-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; flex-direction: column; justify-content: flex-start; }
+        .dash-card:hover { border-color: var(--scf-red); background: var(--card-hover); }
+        .dash-card-title { font-size: 0.8rem; font-weight: bold; color: var(--scf-bright-red); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
-        .supabase-badge {
-            color: #3fb950;
-            background: rgba(46, 160, 67, 0.15);
-            padding: 2px 6px;
-            border-radius: 4px;
-            border: 1px solid rgba(46, 160, 67, 0.3);
-            font-weight: 600;
-        }
+        .section-box { background: var(--scf-dark-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        .section-header { background-color: var(--scf-red); color: #ffffff; border: 1px solid var(--border-color); padding: 10px 15px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 0.9rem; border-radius: 6px; margin-bottom: 15px; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 
-        @keyframes pulse-red {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        .live-badge {
-            display: none;
-            color: var(--scf-bright-red);
-            background: rgba(227, 6, 19, 0.15);
-            padding: 3px 10px;
-            border-radius: 4px;
-            border: 1px solid rgba(227, 6, 19, 0.4);
-            font-weight: bold;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.75rem;
-            letter-spacing: 0.5px;
-        }
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--scf-red);
-            border-radius: 50%;
-            animation: pulse-red 1.2s infinite;
-            display: inline-block;
-        }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); flex-wrap: wrap; }
+        button, select { background: #241414; color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: background 0.2s; }
+        button:hover, select:hover { background: var(--scf-red); color: #fff; border-color: var(--scf-red); }
+        select { padding-right: 30px; }
 
-        .section-box {
-            background: var(--scf-dark-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
+        /* SPIEL-ITEM IM SPIELTAGSBEREICH */
+        .match-card-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 15px; margin-bottom: 10px; cursor: pointer; transition: background 0.15s; }
+        .match-card-item:hover { background: var(--card-hover); border-color: var(--scf-red); }
+        .match-main-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+        .team { display: flex; align-items: center; gap: 8px; width: 38%; }
+        .team.home { justify-content: flex-end; text-align: right; }
+        .team img { width: 22px; height: 22px; object-fit: contain; }
+        .score-box { text-align: center; width: 24%; }
+        .score { font-weight: bold; background: #241414; padding: 4px 10px; border-radius: 6px; display: inline-block; min-width: 55px; font-size: 0.95rem; border: 1px solid var(--border-color); }
+        .match-info-sub { font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 2px; }
 
-        .section-header {
-            background-color: var(--scf-red);
-            color: #ffffff;
-            border: 1px solid var(--border-color);
-            padding: 10px 15px;
-            font-weight: bold;
-            text-align: center;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 8px rgba(227, 6, 19, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+        .live-badge { background: var(--live-red); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; animation: pulse-live 1.5s infinite; display: inline-block; }
+        @keyframes pulse-live { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        .header-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+        .match-scorers-preview { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--border-color); font-size: 0.78rem; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .scorer-tag { display: inline-flex; align-items: center; gap: 6px; background: #170d0d; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-color); width: 100%; justify-content: center; }
+        .scorer-score-badge { font-weight: bold; color: var(--scf-bright-red); background: #241414; padding: 1px 5px; border-radius: 3px; font-size: 0.7rem; }
 
-        .header-action-btn {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #ffffff;
-            padding: 4px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .header-action-btn:hover { background: rgba(0, 0, 0, 0.4); }
+        /* TABELLE */
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+        th, td { padding: 9px 8px; border-bottom: 1px solid var(--border-color); }
+        th { color: var(--text-muted); font-weight: 600; background: var(--scf-dark); text-transform: uppercase; font-size: 0.75rem; }
+        td.center, th.center { text-align: center; }
+        td.right, th.right { text-align: right; }
+        .table-row { cursor: pointer; transition: background 0.15s; }
+        .table-row:hover { background: rgba(227, 6, 19, 0.1); }
+        .table-team { display: flex; align-items: center; gap: 6px; }
+        .table-team img { width: 18px; height: 18px; object-fit: contain; }
 
-        .btn-modal-open {
-            background: var(--scf-dark);
-            color: #ffffff;
-            border: 1px solid var(--scf-red);
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: background 0.2s;
-        }
-        .btn-modal-open:hover { background: var(--scf-red); color: #fff; }
+        tr.cl-zone td:first-child { border-left: 4px solid #3fb950; }
+        tr.el-zone td:first-child { border-left: 4px solid #388bfd; }
+        tr.ecl-zone td:first-child { border-left: 4px solid #e3b341; }
+        tr.relegation-zone td:first-child { border-left: 4px solid #f0883e; }
+        tr.reflux-zone td:first-child { border-left: 4px solid #ff3333; }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .dash-card {
-            background: var(--scf-dark-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .dash-card-title {
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--scf-red);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .dash-card-content {
-            font-size: 0.9rem;
-            color: var(--text-color);
-        }
-        .dash-btn-link {
-            background: var(--scf-dark);
-            color: #ffffff;
-            border: 1px solid var(--scf-red);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: background 0.2s;
-        }
-        .dash-btn-link:hover { background: var(--scf-red); color: #fff; }
+        tr.scf-team-row { background: rgba(227, 6, 19, 0.22) !important; font-weight: bold; }
+        tr.scf-team-row td { border-color: rgba(227, 6, 19, 0.5); color: var(--scf-bright-red); }
+        .scf-highlight { background: rgba(227, 6, 19, 0.15); border-left: 3px solid var(--scf-red); padding-left: 6px; border-radius: 4px; }
 
-        .legends-scroll-box {
-            max-height: 140px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding-right: 4px;
-        }
+        /* MODALS */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
+        .modal-content { background: var(--card-bg); border: 2px solid var(--scf-red); border-radius: 12px; width: 100%; max-width: 750px; max-height: 90vh; overflow-y: auto; padding: 25px; position: relative; box-shadow: 0 10px 30px rgba(227, 6, 19, 0.3); }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; background: none; border: none; }
+        .close-btn:hover { color: var(--text-main); }
+        .modal-header { text-align: center; margin-bottom: 20px; }
+        .modal-teams { display: flex; justify-content: space-around; align-items: center; font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; }
+        .modal-teams img { width: 35px; height: 35px; object-fit: contain; }
+
+        .event-item { display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; padding: 6px 10px; border-bottom: 1px solid var(--border-color); color: var(--text-main); background: #170d0d; margin-bottom: 5px; border-radius: 6px; }
+        .event-time { font-weight: bold; color: var(--scf-bright-red); min-width: 35px; }
+        .event-score { background: #241414; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; border: 1px solid var(--border-color); }
+
+        .stat-row { margin-bottom: 10px; font-size: 0.85rem; }
+        .stat-info { display: flex; justify-content: space-between; margin-bottom: 3px; color: var(--text-muted); font-weight: 500; }
+        .stat-bar-container { display: flex; height: 6px; background: #241414; border-radius: 3px; overflow: hidden; gap: 2px; }
+        .stat-bar-home { background: var(--scf-red); height: 100%; transition: width 0.3s; }
+        .stat-bar-away { background: #388bfd; height: 100%; transition: width 0.3s; }
+
+        /* ADMIN & EXTRAS */
+        .admin-toggle-wrapper { text-align: right; margin-top: 20px; }
+        .admin-toggle-btn { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+        .admin-toggle-btn:hover { color: var(--scf-bright-red); border-color: var(--scf-red); }
+        .admin-card { background: #170d0d; border: 1px solid var(--scf-red); border-radius: 12px; padding: 20px; margin-top: 20px; display: none; }
+
+        .visitor-counter { margin-top: 15px; text-align: center; font-size: 0.78rem; color: var(--text-muted); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .visitor-counter strong { color: #ffffff; }
+
+        .legends-scroll-box { max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
         .legends-scroll-box::-webkit-scrollbar { width: 6px; }
-        .legends-scroll-box::-webkit-scrollbar-track { background: #120a0a; border-radius: 3px; }
-        .legends-scroll-box::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
-        .legends-scroll-box::-webkit-scrollbar-thumb:hover { background: var(--scf-red); }
-
-        .legend-row {
-            background: #241414;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-        .legend-row:hover {
-            background: rgba(227, 6, 19, 0.25);
-            color: var(--scf-bright-red);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 15px;
-        }
-        .modal-card {
-            background: var(--card-bg);
-            border: 2px solid var(--scf-red);
-            border-radius: 12px;
-            padding: 20px;
-            width: 100%;
-            max-width: 550px;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 30px rgba(227, 6, 19, 0.3);
-        }
-        .modal-body {
-            overflow-y: auto;
-            max-height: 70vh;
-            flex: 1;
-        }
-        .modal-body::-webkit-scrollbar { width: 6px; }
-        .modal-body::-webkit-scrollbar-thumb { background: var(--scf-red); border-radius: 3px; }
-
-        .matchday-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-
-        .matchday-btn {
-            background: #241414;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .matchday-btn:hover { background: var(--scf-red); color: #fff; border-color: var(--scf-red); }
-
-        .scf-highlight { 
-            color: #ffffff !important; 
-            font-weight: bold; 
-        }
-
-        tr.scf-match-row {
-            background: rgba(227, 6, 19, 0.12);
-            border-left: 3px solid var(--scf-red);
-            border-right: 3px solid var(--scf-red);
-        }
-        tr.scf-match-row td {
-            border-top: 1px solid rgba(227, 6, 19, 0.3);
-            border-bottom: 1px solid rgba(227, 6, 19, 0.3);
-        }
-
-        tr.match-win td { background: rgba(46, 160, 67, 0.2) !important; border-top: 1px solid rgba(46, 160, 67, 0.4); border-bottom: 1px solid rgba(46, 160, 67, 0.4); }
-        tr.match-draw td { background: rgba(227, 179, 64, 0.2) !important; border-top: 1px solid rgba(227, 179, 64, 0.4); border-bottom: 1px solid rgba(227, 179, 64, 0.4); }
-        tr.match-loss td { background: rgba(248, 81, 73, 0.2) !important; border-top: 1px solid rgba(248, 81, 73, 0.4); border-bottom: 1px solid rgba(248, 81, 73, 0.4); }
-
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.85rem;
-        }
-        th {
-            background-color: var(--scf-dark);
-            color: #ffffff;
-            padding: 10px 8px;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            border-bottom: 2px solid var(--scf-red);
-        }
-        td {
-            padding: 10px 8px;
-            vertical-align: top;
-        }
-        tr:hover { background-color: rgba(227, 6, 19, 0.05); }
-
-        tr.cl-zone td { background: rgba(35, 134, 54, 0.15); border-top: 1px solid rgba(35, 134, 54, 0.2); border-bottom: 1px solid rgba(35, 134, 54, 0.2); }
-        tr.el-zone td { background: rgba(51, 133, 255, 0.15); border-top: 1px solid rgba(51, 133, 255, 0.2); border-bottom: 1px solid rgba(51, 133, 255, 0.2); }
-        tr.ecl-zone td { background: rgba(158, 106, 3, 0.2); border-top: 1px solid rgba(158, 106, 3, 0.25); border-bottom: 1px solid rgba(158, 106, 3, 0.25); }
-        tr.relegation-zone td { background: rgba(227, 179, 64, 0.2); border-top: 1px solid rgba(227, 179, 64, 0.25); border-bottom: 1px solid rgba(227, 179, 64, 0.25); }
-        tr.relegation-direct-zone td { background: rgba(180, 40, 40, 0.2); border-top: 1px solid rgba(180, 40, 40, 0.25); border-bottom: 1px solid rgba(180, 40, 40, 0.25); }
-
-        tr.scf-team-row td {
-            font-weight: bold;
-            color: var(--scf-bright-red);
-            background: rgba(227, 6, 19, 0.25) !important;
-            border-top: 1px solid rgba(227, 6, 19, 0.5) !important;
-            border-bottom: 1px solid rgba(227, 6, 19, 0.5) !important;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-        }
-        .stat-card {
-            background: #0a0404;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--scf-bright-red);
-            margin-top: 4px;
-        }
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .team-cell {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .team-cell.right { justify-content: flex-end; }
-        .team-mini-logo {
-            width: 26px;
-            height: 26px;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-
-        .admin-toggle-wrapper {
-            text-align: right;
-            margin-top: 15px;
-        }
-        .admin-toggle-btn {
-            background: transparent;
-            border: 1px dashed var(--border-color);
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .admin-toggle-btn:hover {
-            color: var(--scf-bright-red);
-            border-color: var(--scf-red);
-        }
-
-        .admin-card {
-            background: #0a0404;
-            border: 1px solid var(--scf-red);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            display: none;
-        }
-        .btn {
-            background: var(--scf-red);
-            color: #ffffff;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            width: 100%;
-            transition: background 0.2s;
-        }
-        .btn:hover { background: var(--scf-bright-red); }
-        
-        .btn-danger {
-            background: transparent;
-            border: none;
-            color: #f85149;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-        }
-
-        .visitor-counter {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-        }
-        .visitor-counter strong {
-            color: #ffffff;
-        }
+        .legends-scroll-box::-webkit-scrollbar-thumb { background: var(--scf-red); border-radius: 3px; }
+        .legend-row { background: #241414; padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
+        .legend-row:hover { background: rgba(227, 6, 19, 0.25); color: var(--scf-bright-red); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- LIVE-TOR-TICKER LAUFBAND -->
-    <div class="ticker-wrap" id="goalTickerBar">
-        <div class="ticker-move" id="tickerBarItemsContainer">
-            <span class="ticker-item text-slate-400">Lade Live-Ticker der Bundesliga...</span>
-        </div>
+    <!-- Live Tor-Alarm Popup -->
+    <div id="goalAlertBanner" onclick="hideGoalAlert()">
+        <div class="goal-alert-title" id="goalAlertTeam">⚽ Tor!</div>
+        <div class="goal-alert-scorer" id="goalAlertScorer">Torschütze & Minute</div>
+        <div class="goal-alert-match" id="goalAlertMatch">Spielstand & Paarung</div>
+        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 8px;">(Zum Schließen antippen)</div>
     </div>
 
-    <!-- HAUPT-BANNER OBEN -->
-    <div class="banner-wrapper">
-        <div class="slideshow-container">
-            <button class="slide-btn slide-prev" onclick="prevSlide()">❮</button>
-            <img id="slideImage" src="" alt="SC Freiburg Banner" class="slide-img">
-            <button class="slide-btn slide-next" onclick="nextSlide()">❯</button>
-        </div>
-        <div class="slide-caption" id="slideCaption">SC Freiburg</div>
-    </div>
-
-    <div class="title-row">
-        <img src="https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
-        <h2>SC <span>Freiburg</span></h2>
-        <img src="https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
-    </div>
-    <div class="subtitle" id="leagueSubtitle">1. Bundesliga — Saison 2026/27 (Mit ESPN Live-Sync)</div>
-    <div class="meta-info">
-        <span>⚡ Web-App & Management: Jürgen Schützendorf</span>
-        <span class="supabase-badge" id="cloudStatusBadge">● Push & Live-Sync Aktiv</span>
-        <div class="live-badge" id="liveIndicatorBadge"><span class="live-dot"></span> LIVE-SPIEL LÄUFT</div>
-    </div>
-
-    <!-- KADER-DIASHOW -->
-    <div class="kader-diashow-wrapper">
-        <div class="kader-diashow-header">
-            ⚽ SCF-Kader Diashow
-        </div>
-        <div class="kader-diashow-body">
-            <button class="kader-btn kader-prev" onclick="prevKaderSlide()">❮</button>
-            <img id="kaderSlideImage" src="" alt="SCF Kader Diashow" class="kader-slide-img">
-            <button class="kader-btn kader-next" onclick="nextKaderSlide()">❯</button>
-        </div>
-    </div>
-
-    <!-- FREIBURG AUSWERTUNG -->
-    <div class="section-box">
-        <div class="section-header">
-            <span>SC Freiburg — Saison-Auswertung</span>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn-modal-open" onclick="openLeagueScorersModal()">⚽ Bundesliga-Torschützen</button>
-                <button class="btn-modal-open" onclick="openScfMatchesModal()">📅 Alle Spiele</button>
-                <button class="btn-modal-open" onclick="openCardsModal()" style="background:#e3b341; color:#000;">🟨🟥 Spieler-Karten</button>
+    <div class="container">
+        <!-- Laufband Oben -->
+        <div class="ticker-wrapper">
+            <div class="ticker-label" id="tickerLabel">⚽ Live-Ticker</div>
+            <div class="ticker-content-box">
+                <div class="ticker-track" id="tickerTrack">
+                    <span class="ticker-item">Lade Ticker-Daten von API-Football...</span>
+                </div>
             </div>
         </div>
-        <div class="stats-grid" id="scfStatsGrid"></div>
-        <div style="margin-top: 15px; background: #0a0404; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 15px;" id="formCurveWidgetBox">
-            <div style="font-size: 0.75rem; font-weight: bold; color: var(--scf-red); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Formverlauf (letzte 15 Spiele):</div>
-            <div id="formCurveWidget" style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">Noch keine beendeten Spiele</div>
-        </div>
-    </div>
 
-    <!-- 6ER KACHELN -->
-    <div class="dashboard-grid">
-        <div class="dash-card">
-            <div class="dash-card-title">⚽ Nächstes Spiel</div>
-            <div class="dash-card-content" id="nextMatchWidget">Lade nächstes Spiel...</div>
+        <!-- HAUPT-BANNER OBEN -->
+        <div class="banner-wrapper">
+            <div class="slideshow-container">
+                <button class="slide-btn slide-prev" onclick="prevSlide()">❮</button>
+                <img id="slideImage" src="" alt="SC Freiburg Banner" class="slide-img">
+                <button class="slide-btn slide-next" onclick="nextSlide()">❯</button>
+            </div>
+            <div class="slide-caption" id="slideCaption">SC Freiburg</div>
         </div>
-        <div class="dash-card">
-            <div class="dash-card-title">🏁 Letztes Pflichtspiel</div>
-            <div class="dash-card-content" id="lastMatchWidget">Wird geladen...</div>
+
+        <div class="title-row">
+            <img src="https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
+            <h2>SC <span>Freiburg</span></h2>
+            <img src="https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg.png" alt="SCF Logo" class="header-logo">
         </div>
-        <div class="dash-card">
-            <div class="dash-card-title">⚽ Top 3 Torschützen (SC Freiburg)</div>
-            <div class="dash-card-content" id="topScorersWidget">Wird berechnet...</div>
+        <div class="subtitle">1. Bundesliga PRO Dashboard — Saison 2026/27</div>
+        <div class="meta-info">
+            <span>⚡ Webmanagement: Jürgen Schützendorf</span>
+            <span class="supabase-badge" id="cloudStatusBadge">● API & Push Aktiv</span>
         </div>
-        <div class="dash-card">
-            <div class="dash-card-title" style="color:var(--scf-bright-red);">🔥 Form-König (letzte 5 Spiele)</div>
-            <div class="dash-card-content" id="formKingWidget">Berechne Formtabelle...</div>
+
+        <div id="apiStatusBanner" class="status-box">
+            <span>Verbinde mit API-Football...</span>
         </div>
-        <div class="dash-card">
-            <div class="dash-card-title">⭐ SCF-Legenden (Ehrenkabine)</div>
-            <div class="dash-card-content">
+
+        <!-- KADER-DIASHOW -->
+        <div class="kader-diashow-wrapper">
+            <div class="kader-diashow-header">⚽ SCF-Kader Diashow</div>
+            <div class="kader-diashow-body">
+                <button class="kader-btn kader-prev" onclick="prevKaderSlide()">❮</button>
+                <img id="kaderSlideImage" src="" alt="SCF Kader Diashow" class="kader-slide-img">
+                <button class="kader-btn kader-next" onclick="nextKaderSlide()">❯</button>
+            </div>
+        </div>
+
+        <!-- Infokacheln (Genau 8 Kacheln: 2 Reihen à 4 Kacheln) -->
+        <div class="dashboard-grid">
+            <!-- Kachel 1: Nächstes Spiel -->
+            <div class="dash-card">
+                <div class="dash-card-title">⚽ Nächstes Spiel</div>
+                <div id="nextMatchWidget" style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="font-weight: bold; color: var(--text-muted); font-size: 0.78rem;">ST 8 — 31.10.2026 18:30</div>
+                    <div style="font-weight: bold; font-size: 0.9rem;">SC Freiburg vs Augsburg</div>
+                    <div style="color: var(--scf-bright-red); font-size: 0.8rem; margin-top: 2px;" id="countdownDisplay">⏳ Berechne...</div>
+                </div>
+            </div>
+
+            <!-- Kachel 2: Letztes Pflichtspiel (Reine Infokachel ohne Popup) -->
+            <div class="dash-card">
+                <div class="dash-card-title">🏁 Letztes Pflichtspiel</div>
+                <div id="lastMatchWidget" style="font-size: 0.82rem; display: flex; flex-direction: column; gap: 4px;">
+                    <div style="font-weight: bold; color: var(--text-muted); font-size: 0.78rem;">ST 7 (25.10.2026)</div>
+                    <div style="font-weight: bold; font-size: 0.9rem;">SC Freiburg 1 : 3 Bayern Munich</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px dashed var(--border-color); padding-top: 4px; margin-top: 2px;">
+                        ⚽ 12' Kane (0:1)<br>⚽ 45' Olise (0:2)<br>⚽ 68' Grifo (1:2)<br>⚽ 89' Musiala (1:3)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kachel 3: Top-3 Tabellenführer -->
+            <div class="dash-card">
+                <div class="dash-card-title">🏆 Top-3 Tabellenführer</div>
+                <div id="top3TableWidget">Wird berechnet...</div>
+            </div>
+
+            <!-- Kachel 4: Top-Torschützen (mit Spielerbildern) -->
+            <div class="dash-card" onclick="openTopScorersModal()" title="Klicken für komplette Torschützenliste">
+                <div class="dash-card-title">⚽ Top-Torschützen <span>🔍 Alle</span></div>
+                <div id="topScorersWidget">Lade Torschützen...</div>
+            </div>
+
+            <!-- Kachel 5: Top-Vorlagen (mit Spielerbildern) -->
+            <div class="dash-card" onclick="openTopAssistsModal()" title="Klicken für Vorlagen-Bestenliste">
+                <div class="dash-card-title">🎯 Top-Vorlagen <span>🔍 Alle</span></div>
+                <div id="topAssistsWidget">Lade Vorlagen...</div>
+            </div>
+
+            <!-- Kachel 6: Gelbe / Rote Karten (mit Spielerbildern) -->
+            <div class="dash-card" onclick="openYellowCardsModal()" title="Klicken für Karten-Bestenliste">
+                <div class="dash-card-title">🟨 Gelbe / Rote Karten <span>🔍 Alle</span></div>
+                <div id="yellowCardsWidget">Lade Karten...</div>
+            </div>
+
+            <!-- Kachel 7: SCF-Legenden -->
+            <div class="dash-card">
+                <div class="dash-card-title">⭐ SCF-Legenden</div>
                 <div class="legends-scroll-box">
-                    <div class="legend-row" onclick="openLegendModal('Volker Finke')"><span>Volker Finke (Jahrhunderttrainer)</span><span style="color:var(--scf-red)">➔</span></div>
-                    <div class="legend-row" onclick="openLegendModal('Christian Streich')"><span>Christian Streich (Kult-Trainer)</span><span style="color:var(--scf-red)">➔</span></div>
-                    <div class="legend-row" onclick="openLegendModal('Nils Petersen')"><span>Nils Petersen (Rekordschütze)</span><span style="color:var(--scf-red)">➔</span></div>
-                    <div class="legend-row" onclick="openLegendModal('Andreas Zeyer')"><span>Andreas Zeyer</span><span style="color:var(--scf-red)">➔</span></div>
-                    <div class="legend-row" onclick="openLegendModal('Uwe Wassmer')"><span>Uwe Wassmer</span><span style="color:var(--scf-red)">➔</span></div>
-                    <div class="legend-row" onclick="openLegendModal('Souleyman Sané')"><span>Souleyman Sané</span><span style="color:var(--scf-red)">➔</span></div>
+                    <div class="legend-row" onclick="openLegendModal('Volker Finke')"><span>Volker Finke</span><span style="color:var(--scf-red)">➔</span></div>
+                    <div class="legend-row" onclick="openLegendModal('Christian Streich')"><span>Christian Streich</span><span style="color:var(--scf-red)">➔</span></div>
+                    <div class="legend-row" onclick="openLegendModal('Nils Petersen')"><span>Nils Petersen</span><span style="color:var(--scf-red)">➔</span></div>
                     <div class="legend-row" onclick="openLegendModal('Vincenzo Grifo')"><span>Vincenzo Grifo</span><span style="color:var(--scf-red)">➔</span></div>
                 </div>
             </div>
+
+            <!-- Kachel 8: SCF-Historie -->
+            <div class="dash-card">
+                <div class="dash-card-title"><span>📜 SCF-Historie</span> <span style="cursor:pointer; color:var(--scf-red)" onclick="nextHistorieFakt()">Weiter</span></div>
+                <div id="historieWidget" style="font-style: italic; font-size: 0.8rem;">"Der SC Freiburg wurde am 30. Mai 1904 gegründet."</div>
+            </div>
         </div>
-        <div class="dash-card">
-            <div class="dash-card-title"><span>📜 SCF-Historie</span> <span style="cursor:pointer; color:var(--scf-red)" onclick="nextHistorieFakt()">Nächster Fakt</span></div>
-            <div class="dash-card-content" id="historieWidget" style="font-style: italic; margin-bottom: 12px;">"Der SC Freiburg wurde am 30. Mai 1904 gegründet."</div>
-            <div style="display: flex; gap: 8px;">
-                <a href="https://scfreiburg.com" target="_blank" class="dash-btn-link">🌐 SCFreiburg.com</a>
-                <a href="https://shop.scfreiburg.com" target="_blank" class="dash-btn-link" style="background:var(--scf-red); color:#ffffff;">🛍️ Shop</a>
+
+        <div class="controls">
+            <button onclick="changeMatchday(-1)">◄ Vorheriger</button>
+            <select id="matchdaySelect" onchange="loadMatchday(this.value)"></select>
+            <button onclick="changeMatchday(1)">Nächster ►</button>
+            <button onclick="subscribePush()" style="background: var(--scf-red); color: #fff; font-weight: bold;">🔔 Supabase Tor-Alarm</button>
+        </div>
+
+        <!-- Hauptbereich -->
+        <div class="section-box">
+            <div class="section-header">
+                <span id="matchdayTitle">Spieltag</span>
+            </div>
+            <div id="matchesList">Lade Spiele...</div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-header">
+                <span>Bundesliga-Tabelle (Klicke auf ein Team für Saisonstatistiken)</span>
+            </div>
+            <div class="table-container" id="tableContainer">
+                Lade Tabelle...
+            </div>
+            <div class="visitor-counter">
+                👁️ App-Besucher insgesamt: <strong id="visitorCountDisplay">25</strong>
+            </div>
+        </div>
+
+        <!-- ADMIN BEREICH -->
+        <div class="admin-card" id="adminCard">
+            <div style="font-weight: bold; color: var(--scf-bright-red); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+                <span>🔧 Supabase Push-Benachrichtigung testen</span>
+                <span style="font-size: 0.7rem; color: #3fb950;">● Admin-Modus Aktiv</span>
+            </div>
+            <button style="background: #238636; color:#fff; width: 100%; font-weight: bold; border:none; padding:10px; border-radius:6px; cursor:pointer;" onclick="sendTestPush()">🚀 Test-Push Benachrichtigung senden</button>
+        </div>
+
+        <div class="admin-toggle-wrapper">
+            <button class="admin-toggle-btn" onclick="toggleAdminMode()">⚙️ Admin-Zugang</button>
+        </div>
+    </div>
+
+    <!-- Modal für Spieldetails & Statistiken -->
+    <div id="matchModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('matchModal')">&times;</button>
+            <div class="modal-header">
+                <div class="modal-teams" id="modalTeamsHeader"></div>
+                <div id="modalStatus" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 4px;"></div>
+                <div id="modalReferee" style="color: var(--scf-bright-red); font-size: 0.8rem;"></div>
+            </div>
+            <div style="margin-top: 15px;">
+                <h3 style="font-size: 1rem; color: var(--scf-bright-red); margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Tore & Spielverlauf</h3>
+                <div id="modalEvents">Lade Spieldetails...</div>
+            </div>
+            <div style="margin-top: 20px;">
+                <h3 style="font-size: 1rem; color: var(--scf-bright-red); margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Formationen, Aufstellungen, Wechsel & Karten</h3>
+                <div id="modalLineups">Lade Aufstellungen & Events...</div>
+            </div>
+            <div style="margin-top: 20px;">
+                <h3 style="font-size: 1rem; color: var(--scf-bright-red); margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Spieldatistiken</h3>
+                <div id="modalStats">Lade Statistiken...</div>
             </div>
         </div>
     </div>
 
-    <!-- SPIELTAGS-TABELLE -->
-    <div class="section-box">
-        <div class="section-header">
-            <span id="matchdayTableHeader">Spieltag 7 — Spiele & Ergebnisse</span>
-            <div class="header-actions">
-                <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
-                <button class="header-action-btn" onclick="loadEspnMatchdayData(true)">🔄 Aktualisieren & Live</button>
+    <!-- Modal für Team-Saisonstatistiken -->
+    <div id="teamStatsModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('teamStatsModal')">&times;</button>
+            <div class="modal-header">
+                <div id="teamStatsHeader" style="font-size: 1.3rem; font-weight: bold; color: var(--scf-bright-red);">Team-Saisonstatistik</div>
             </div>
-        </div>
-        <div class="matchday-controls">
-            <button class="matchday-btn" onclick="changeMatchday(-1)">◀ Vorheriger Spieltag</button>
-            <strong id="matchdayDisplay" style="color: var(--scf-bright-red); font-size: 1.1rem;">Spieltag 7</strong>
-            <button class="matchday-btn" onclick="changeMatchday(1)">Nächster Spieltag ▶</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 120px; color: #ffffff;">Termin</th>
-                        <th style="text-align: right;">Heimmannschaft</th>
-                        <th style="text-align: center; width: 160px;">Ergebnis / Status</th>
-                        <th>Gastmannschaft</th>
-                    </tr>
-                </thead>
-                <tbody id="matchdayTableBody">
-                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Spielplan von ESPN...</td></tr>
-                </tbody>
-            </table>
+            <div id="teamStatsContent" style="margin-top: 15px;">Lade Team-Werte...</div>
         </div>
     </div>
 
-    <!-- GESAMT-TABELLE -->
-    <div class="section-box">
-        <div class="section-header">
-            <span>Bundesliga-Tabelle (Gesamt)</span>
-            <div class="header-actions">
-                <button class="header-action-btn" onclick="requestPushPermission()">🔔 Push-Alarm</button>
-            </div>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 35px;">Pl.</th>
-                        <th>Mannschaft</th>
-                        <th style="text-align: center;">Sp</th>
-                        <th style="text-align: center;">S</th>
-                        <th style="text-align: center;">U</th>
-                        <th style="text-align: center;">N</th>
-                        <th style="text-align: center;">Tore</th>
-                        <th style="text-align: center;">Diff</th>
-                        <th style="text-align: center;">Punkte</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Tabelle...</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(35, 134, 54, 0.4); border-radius: 2px; display: inline-block;"></span> Champions League (1. - 4.)</div>
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(51, 133, 255, 0.4); border-radius: 2px; display: inline-block;"></span> Europa League (5.)</div>
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(158, 106, 3, 0.4); border-radius: 2px; display: inline-block;"></span> Conference League (6.)</div>
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(227, 179, 64, 0.25); border-radius: 2px; display: inline-block;"></span> Relegation (16.)</div>
-            <div style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(180, 40, 40, 0.5); border-radius: 2px; display: inline-block;"></span> Abstieg (17. - 18.)</div>
-        </div>
+    <!-- Modals für Bestenlisten -->
+    <div id="scorersModal" class="modal"><div class="modal-content"><button class="close-btn" onclick="closeModal('scorersModal')">&times;</button><div class="modal-header"><h2 style="color:var(--scf-bright-red);">⚽ Torschützenliste</h2></div><div id="fullScorersContainer">Lade...</div></div></div>
+    <div id="assistsModal" class="modal"><div class="modal-content"><button class="close-btn" onclick="closeModal('assistsModal')">&times;</button><div class="modal-header"><h2 style="color:var(--scf-bright-red);">🎯 Top-Vorlagengeber</h2></div><div id="fullAssistsContainer">Lade...</div></div></div>
+    <div id="yellowCardsModal" class="modal"><div class="modal-content"><button class="close-btn" onclick="closeModal('yellowCardsModal')">&times;</button><div class="modal-header"><h2 style="color:var(--scf-bright-red);">🟨 Karten-Statistik</h2></div><div id="fullYellowCardsContainer">Lade...</div></div></div>
 
-        <!-- BESUCHER COUNTER -->
-        <div class="visitor-counter">
-            👁️ App-Besucher insgesamt: <strong id="visitorCountDisplay">20</strong>
+    <!-- Legenden Modal -->
+    <div id="legendModal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('legendModal')">&times;</button>
+            <div class="modal-header"><h2 style="color:var(--scf-bright-red);" id="legendModalTitle">Legende</h2></div>
+            <div id="legendModalText" style="font-size: 0.95rem; line-height: 1.6;"></div>
         </div>
     </div>
 
-    <!-- ADMIN BEREICH -->
-    <div class="admin-card" id="adminCard">
-        <div style="font-weight: bold; color: var(--scf-bright-red); margin-bottom: 12px; text-transform: uppercase; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
-            <span>🔧 Push-Benachrichtigung testen</span>
-            <span style="font-size: 0.7rem; color: #3fb950;">● Admin-Modus Aktiv</span>
-        </div>
-        <button class="btn" style="background: #238636; color: #fff;" onclick="sendTestPush()">🚀 Test-Push Benachrichtigung senden</button>
-    </div>
+    <script>
+        const SUPABASE_URL = 'https://lhusylpjnujlqomougmg.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_yXEueWILvAq-Vm2VfTuYyg_BIQeE1KK';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <div class="admin-toggle-wrapper">
-        <button class="admin-toggle-btn" onclick="toggleAdminMode()">⚙️ Admin-Zugang</button>
-    </div>
-</div>
+        const apiKey = "297322363f3bf16e1304cfb933a0c8d5";
+        const leagueId = 78; // 1. Bundesliga
+        const season = "2026";
+        const ADMIN_PIN = "1904";
+        let isAdmin = false;
 
-<!-- POPUP MODALE -->
-<div class="modal-overlay" id="leagueScorersModal">
-    <div class="modal-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">⚽ Torschützenliste — 1. Bundesliga</div>
-            <button class="btn-danger" onclick="closeLeagueScorersModal()">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40px; text-align: center;">Pl.</th>
-                            <th>Spieler & Verein</th>
-                            <th style="text-align: center; width: 70px;">Tore</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leagueScorersModalBody">
-                        <tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Torschützen...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <button class="btn" style="margin-top: 15px;" onclick="closeLeagueScorersModal()">Schließen</button>
-    </div>
-</div>
+        let currentMatchday = "";
+        let globalTopScorers = [];
+        let globalTopAssists = [];
+        let globalYellowCards = [];
+        let previousScores = {};
+        let smartPollingInterval = null;
 
-<div class="modal-overlay" id="scfMatchesModal">
-    <div class="modal-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">📅 SC Freiburg — Alle Saisonspiele</div>
-            <button class="btn-danger" onclick="closeScfMatchesModal()">✕</button>
-        </div>
-        <div class="modal-body">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 50px; text-align: center;">ST</th>
-                            <th style="width: 90px;">Termin</th>
-                            <th style="text-align: right;">Heim</th>
-                            <th style="text-align: center; width: 70px;">Erg.</th>
-                            <th>Gast</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scfMatchesModalBody">
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Spiele...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <button class="btn" style="margin-top: 15px;" onclick="closeScfMatchesModal()">Schließen</button>
-    </div>
-</div>
+        // COUNTDOWN TIMER FÜR NÄCHSTES SPIEL
+        const nextMatchDate = new Date("2026-10-31T18:30:00").getTime();
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = nextMatchDate - now;
+            const cdElem = document.getElementById("countdownDisplay");
+            if (!cdElem) return;
 
-<div class="modal-overlay" id="cardsModal">
-    <div class="modal-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: #ffffff;">🟨🟥 SC Freiburg — Karten-Übersicht & Sperren</div>
-            <button class="btn-danger" onclick="closeCardsModal()">✕</button>
-        </div>
-        <div class="modal-body">
-            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
-                Hinweis: Nach jeweils 5 Gelben Karten greift gemäß DFB-Statuten eine automatische 1-Spiele-Sperre und der Zähler springt im Anschluss wieder bei 0 an.
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Spieler</th>
-                            <th style="text-align: center; width: 70px;">🟨 Gelb</th>
-                            <th style="text-align: center; width: 80px;">Sperren</th>
-                            <th style="text-align: center; width: 70px;">🟨🟥 Gelb-Rot</th>
-                            <th style="text-align: center; width: 70px;">🟥 Rot</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cardsModalBody">
-                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Karten...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <button class="btn" style="margin-top: 15px;" onclick="closeCardsModal()">Schließen</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="legendModal">
-    <div class="modal-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            <div style="font-weight: bold; font-size: 1.1rem; color: var(--scf-bright-red);" id="legendModalTitle">Legende</div>
-            <button class="btn-danger" onclick="closeLegendModal()">✕</button>
-        </div>
-        <div class="modal-body" id="legendModalText" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-color);">
-            Lade Informationen...
-        </div>
-        <button class="btn" style="margin-top: 15px;" onclick="closeLegendModal()">Schließen</button>
-    </div>
-</div>
-
-<script>
-    const SUPABASE_URL = 'https://lhusylpjnujlqomougmg.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_yXEueWILvAq-Vm2VfTuYyg_BIQeE1KK';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const ADMIN_PIN = "1904";
-    let isAdmin = false;
-
-    let recentGoalsList = JSON.parse(localStorage.getItem('scf_recent_goals_cache') || '[]');
-
-    // BESUCHER COUNTER
-    function initVisitorCounter() {
-        let count = parseInt(localStorage.getItem('scf_app_visitors') || '20');
-        if (!sessionStorage.getItem('visited_scf_session')) {
-            count++;
-            localStorage.setItem('scf_app_visitors', count);
-            sessionStorage.setItem('visited_scf_session', 'true');
-        }
-        document.getElementById('visitorCountDisplay').textContent = count.toLocaleString('de-DE');
-    }
-
-    // 1. HAUPT-BANNER DIASHOW (GitHub Raw Pfade)
-    const slides = [
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20fans.jpg", name: "SC Freiburg Fans" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20fans01.jpg", name: "Fankurve & Stimmung" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20stadion.png", name: "Europa-Park Stadion" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20team.png", name: "Mannschaft" }
-    ];
-    let currentSlideIndex = 0;
-    let slideInterval;
-
-    function showSlide(index) {
-        if (index >= slides.length) currentSlideIndex = 0;
-        else if (index < 0) currentSlideIndex = slides.length - 1;
-        else currentSlideIndex = index;
-
-        let imgElem = document.getElementById('slideImage');
-        let captionElem = document.getElementById('slideCaption');
-        if (!imgElem) return;
-
-        imgElem.style.opacity = 0;
-        setTimeout(() => {
-            imgElem.src = slides[currentSlideIndex].url;
-            captionElem.textContent = slides[currentSlideIndex].name;
-            imgElem.style.opacity = 1;
-        }, 200);
-    }
-
-    function nextSlide() { showSlide(currentSlideIndex + 1); resetTimer(); }
-    function prevSlide() { showSlide(currentSlideIndex - 1); resetTimer(); }
-    function resetTimer() {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(() => { showSlide(currentSlideIndex + 1); }, 5000);
-    }
-
-    // 2. KADER-DIASHOW (GitHub Raw Pfade)
-    const kaderSlides = [
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Trainer.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Tor.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Abwehr.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Abwehr01.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Mittelfeld.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Mittelfeld01.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Angriff.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Gemischt.png" },
-        { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Gemischt01.png" }
-    ];
-    let currentKaderIndex = 0;
-    let kaderInterval;
-
-    function showKaderSlide(index) {
-        if (index >= kaderSlides.length) currentKaderIndex = 0;
-        else if (index < 0) currentKaderIndex = kaderSlides.length - 1;
-        else currentKaderIndex = index;
-
-        let imgElem = document.getElementById('kaderSlideImage');
-        if (!imgElem) return;
-
-        imgElem.style.opacity = 0;
-        setTimeout(() => {
-            imgElem.src = kaderSlides[currentKaderIndex].url;
-            imgElem.style.opacity = 1;
-        }, 200);
-    }
-
-    function nextKaderSlide() { showKaderSlide(currentKaderIndex + 1); resetKaderTimer(); }
-    function prevKaderSlide() { showKaderSlide(currentKaderIndex - 1); resetKaderTimer(); }
-    function resetKaderTimer() {
-        clearInterval(kaderInterval);
-        kaderInterval = setInterval(() => { showKaderSlide(currentKaderIndex + 1); }, 6000);
-    }
-
-    const legendenInfos = {
-        "Volker Finke": "Volker Finke prägte den SC Freiburg von 1991 bis 2007 als Jahrhunderttrainer. Er führte den Sport-Club erstmals in die Bundesliga und etablierte die berühmte Freiburger Fussballschule.",
-        "Christian Streich": "Christian Streich war von 2011 bis 2024 der prägende Kult-Trainer des SC Freiburg. Mit seiner emotionalen, gradlinigen Art und leidenschaftlichem Fußball führte er den Klub in den Europapokal und bis ins DFB-Pokalfinale.",
-        "Nils Petersen": "Nils Petersen ist die unangefochtene Bundesliga-Tore-Ikone des SC Freiburg. Als genialer Joker und treffsicherer Stürmer schrieb er jahrelang Geschichte im Breisgau.",
-        "Andreas Zeyer": "Andreas Zeyer war jahrelang das sportliche Herz im Mittelfeld des SC Freiburg und führte die Mannschaft als Kapitän durch die erfolgreichen 90er-Jahre.",
-        "Uwe Wassmer": "Uwe Wassmer erzielte unvergessliche Tore für den Sport-Club in der Bundesliga und gehörte zur legendären Aufstiegself unter Volker Finke.",
-        "Souleyman Sané": "Der pfeilschnelle Stürmer stürmte in den 90ern für Freiburg und begeisterte die Fans mit spektakulären Toren.",
-        "Vincenzo Grifo": "Vincenzo Grifo ist der absolute Spielgestalter, Standardspezialist und Publikumsliebling im aktuellen SCF-Team mit Scorerpunkten für die Geschichtsbücher."
-    };
-
-    function openLegendModal(name) {
-        document.getElementById('legendModalTitle').textContent = "⭐ " + name;
-        document.getElementById('legendModalText').textContent = legendenInfos[name] || "Informationen zu dieser SC Freiburg-Legende.";
-        document.getElementById('legendModal').style.display = 'flex';
-    }
-    function closeLegendModal() { document.getElementById('legendModal').style.display = 'none'; }
-
-    function openCardsModal() {
-        let tbody = document.getElementById('cardsModalBody');
-        tbody.innerHTML = '';
-
-        let playerStats = {};
-        Object.values(leagueMatches).forEach(matchList => {
-            if (!Array.isArray(matchList)) return;
-            matchList.forEach(m => {
-                let parseGoalsAndCards = (gList, teamName) => {
-                    if (teamName.toLowerCase().includes('freiburg') && Array.isArray(gList)) {
-                        gList.forEach(g => {
-                            if (g.includes('🟨') || g.includes('🟥')) {
-                                let parts = g.split(' ');
-                                let icon = parts[0];
-                                let name = parts.slice(1).join(' ').split('(')[0].trim();
-                                if (name) {
-                                    if (!playerStats[name]) playerStats[name] = { yellow: 0, yellowRed: 0, red: 0 };
-                                    if (icon === '🟨') playerStats[name].yellow++;
-                                    else if (icon === '🟨🟥') playerStats[name].yellowRed++;
-                                    else if (icon === '🟥') playerStats[name].red++;
-                                }
-                            }
-                        });
-                    }
-                };
-                parseGoalsAndCards(m.goalsHome, m.home);
-                parseGoalsAndCards(m.goalsAway, m.away);
-            });
-        });
-
-        let players = Object.keys(playerStats);
-        if (players.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Bisher keine Karten erfasst.</td></tr>`;
-        } else {
-            players.forEach(name => {
-                let st = playerStats[name];
-                let suspensions = Math.floor(st.yellow / 5);
-                let currentYellow = st.yellow % 5;
-
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td style="font-weight: bold; color: #ffffff;">${name}</td>
-                    <td style="text-align: center; font-weight: bold; color: #e3b341;">${st.yellow} <span style="font-size:0.7rem; color:var(--text-muted); font-weight:normal;">(${currentYellow} akt.)</span></td>
-                    <td style="text-align: center; font-weight: bold; color: ${suspensions > 0 ? '#f85149' : 'var(--text-muted)'};">${suspensions > 0 ? suspensions + 'x gesperrt' : 'Keine'}</td>
-                    <td style="text-align: center; font-weight: bold; color: #e3b341;">${st.yellowRed}</td>
-                    <td style="text-align: center; font-weight: bold; color: #f85149;">${st.red}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-        document.getElementById('cardsModal').style.display = 'flex';
-    }
-    function closeCardsModal() { document.getElementById('cardsModal').style.display = 'none'; }
-
-    const historieFakten = [
-        "Der SC Freiburg wurde am 30. Mai 1904 gegründet.",
-        "Das moderne Europa-Park Stadion bietet Platz für 34.700 Zuschauer und ersetzte das traditionsreiche Dreisamstadion.",
-        "Die Freiburger Fußballschule gilt bundesweit als eine der besten Talentschmieden im Profifußball.",
-        "2022 erreichte der SC Freiburg erstmals das DFB-Pokalfinale in Berlin."
-    ];
-    let historieIdx = 0;
-    function nextHistorieFakt() {
-        historieIdx = (historieIdx + 1) % historieFakten.length;
-        document.getElementById('historieWidget').textContent = `"${historieFakten[historieIdx]}"`;
-    }
-
-    let teamLogos = {};
-    let leagueMatches = {};
-    let currentMatchday = 7; 
-    let isInitialized = false;
-    let nextMatchDateTime = null;
-    let previousEspnScores = {};
-    let pushedUpcomingMatchdayKeys = new Set();
-
-    const matchdayFridays = {
-        1: "2026-08-28", 2: "2026-09-04", 3: "2026-09-11", 4: "2026-09-18", 5: "2026-10-09",
-        6: "2026-10-16", 7: "2026-10-23", 8: "2026-10-30", 9: "2026-11-06", 10: "2026-11-20",
-        11: "2026-11-27", 12: "2026-12-04", 13: "2026-12-11", 14: "2026-12-18", 15: "2027-01-08",
-        16: "2027-01-12", 17: "2027-01-15", 18: "2027-01-22", 19: "2027-01-29", 20: "2027-02-05",
-        21: "2027-02-12", 22: "2027-02-19", 23: "2027-02-26", 24: "2027-03-02", 25: "2027-03-05",
-        26: "2027-03-12", 27: "2027-03-19", 28: "2027-04-02", 29: "2027-04-09", 30: "2027-04-16",
-        31: "2027-04-23", 32: "2027-05-07", 33: "2027-05-14", 34: "2027-05-22"
-    };
-
-    function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-        const rawData = window.atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-        for (let i = 0; i < rawData.length; ++i) {
-            outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-    }
-
-    async function requestPushPermission() {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            alert("Push-Benachrichtigungen werden von diesem Browser leider nicht unterstützt.");
-            return;
-        }
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                alert("Die Berechtigung für Benachrichtigungen wurde verweigert.");
+            if (distance < 0) {
+                cdElem.textContent = "🔴 Spiel läuft / Beendet";
                 return;
             }
-            const registration = await navigator.serviceWorker.register('./sw.js');
-            await registration.ready;
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            const publicVapidKey = 'BAsnfWgySLti5LzulXfN-xI-x7UDV32LO98YXgg1qdoRY1E1Tl05QPgCvOMgfwe80cSv_K7336-dhJTgBkHUI70';
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-            });
-
-            const p256dh = subscription.getKey('p256dh') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
-            const auth = subscription.getKey('auth') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
-
-            await supabaseClient.from('push_subscriptions_scf').upsert({
-                endpoint: subscription.endpoint,
-                p256dh: p256dh,
-                auth: auth
-            }, { onConflict: 'endpoint' });
-
-            alert("Ligaweiter Push-Alarm für alle Bundesliga-Tore erfolgreich aktiviert!");
-        } catch (error) {
-            console.error('Fehler bei der Push-Registrierung:', error);
-            alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
+            cdElem.textContent = `⏳ Noch ${days}T ${hours}Std ${minutes}Min ${seconds}Sek`;
         }
-    }
+        setInterval(updateCountdown, 1000);
 
-    async function sendTestPush() {
-        try {
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    table: 'push_subscriptions_scf',
-                    title: "⚽ Bundesliga Tor-Alarm",
-                    body: "Test-Alarm für alle Bundesliga-Partien erfolgreich ausgelöst!"
-                })
-            });
-            if (response.ok) alert("Test-Push erfolgreich ausgelöst!");
-            else alert("Fehler von der Edge Function.");
-        } catch (e) {
-            alert("Netzwerkfehler: " + e.message);
-        }
-    }
-
-    // RENDER-FUNKTION FÜR DAS PERFEKTE LAUFBAND
-    function renderRecentGoalsTicker() {
-        let tickerBar = document.getElementById('goalTickerBar');
-        let container = document.getElementById('tickerBarItemsContainer');
-
-        if (!tickerBar || !container) return;
-
-        let matches = leagueMatches[currentMatchday] || [];
-        if (matches.length === 0) {
-            tickerBar.style.display = 'none';
-            return;
+        // BESUCHER COUNTER
+        function initVisitorCounter() {
+            let count = parseInt(localStorage.getItem('scf_app_visitors') || '25');
+            if (!sessionStorage.getItem('visited_scf_session')) {
+                count++;
+                localStorage.setItem('scf_app_visitors', count);
+                sessionStorage.setItem('visited_scf_session', 'true');
+            }
+            document.getElementById('visitorCountDisplay').textContent = count.toLocaleString('de-DE');
         }
 
-        let htmlItems = '';
-        let loopMatches = [...matches, ...matches];
+        // BANNER DIASHOW
+        const slides = [
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20fans.jpg", name: "SC Freiburg Fans" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20fans01.jpg", name: "Fankurve & Stimmung" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20stadion.png", name: "Europa-Park Stadion" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/freiburg%20team.png", name: "Mannschaft" }
+        ];
+        let currentSlideIndex = 0;
+        let slideInterval;
 
-        loopMatches.forEach(m => {
-            let hasResult = m.homeScore !== null && m.homeScore !== undefined;
-            let scoreText = hasResult ? `${m.homeScore}:${m.awayScore}` : m.time;
-            let statusStyle = m.isLive ? 'color: #f87171; font-weight: bold;' : 'color: #fff;';
-            let isScf = m.home.toLowerCase().includes('freiburg') || m.away.toLowerCase().includes('freiburg');
-            let highlightStyle = isScf ? 'border-left: 3px solid var(--scf-red); padding-left: 10px;' : '';
+        function showSlide(index) {
+            if (index >= slides.length) currentSlideIndex = 0;
+            else if (index < 0) currentSlideIndex = slides.length - 1;
+            else currentSlideIndex = index;
+            let imgElem = document.getElementById('slideImage');
+            let captionElem = document.getElementById('slideCaption');
+            if (!imgElem) return;
+            imgElem.style.opacity = 0;
+            setTimeout(() => {
+                imgElem.src = slides[currentSlideIndex].url;
+                captionElem.textContent = slides[currentSlideIndex].name;
+                imgElem.style.opacity = 1;
+            }, 200);
+        }
+        function nextSlide() { showSlide(currentSlideIndex + 1); resetTimer(); }
+        function prevSlide() { showSlide(currentSlideIndex - 1); resetTimer(); }
+        function resetTimer() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(() => { showSlide(currentSlideIndex + 1); }, 5000);
+        }
 
-            let homeLogoUrl = teamLogos[m.home.trim().toLowerCase()] || '';
-            let awayLogoUrl = teamLogos[m.away.trim().toLowerCase()] || '';
+        // KADER-DIASHOW
+        const kaderSlides = [
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Trainer.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Tor.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Abwehr.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Abwehr01.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Mittelfeld.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Mittelfeld01.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Angriff.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Gemischt.png" },
+            { url: "https://raw.githubusercontent.com/Zechenhauer/sc-freiburg/main/assets/vereinslogos/Gemischt01.png" }
+        ];
+        let currentKaderIndex = 0;
+        let kaderInterval;
 
-            htmlItems += `
-                <div class="ticker-item" style="${highlightStyle}">
-                    ${homeLogoUrl ? `<img src="${homeLogoUrl}" class="team-mini-logo" alt="">` : ''}
-                    <span style="${m.home.toLowerCase().includes('freiburg') ? 'color: var(--scf-bright-red); font-weight:bold;' : 'color:#cbd5e1;'}">${m.home}</span>
-                    <span style="font-weight:900; ${statusStyle}">${scoreText}</span>
-                    <span style="${m.away.toLowerCase().includes('freiburg') ? 'color: var(--scf-bright-red); font-weight:bold;' : 'color:#cbd5e1;'}">${m.away}</span>
-                    ${awayLogoUrl ? `<img src="${awayLogoUrl}" class="team-mini-logo" alt="">` : ''}
-                    ${m.isLive ? '<span class="live-dot ml-1"></span>' : ''}
-                </div>
-            `;
-        });
+        function showKaderSlide(index) {
+            if (index >= kaderSlides.length) currentKaderIndex = 0;
+            else if (index < 0) currentKaderIndex = kaderSlides.length - 1;
+            else currentKaderIndex = index;
+            let imgElem = document.getElementById('kaderSlideImage');
+            if (!imgElem) return;
+            imgElem.style.opacity = 0;
+            setTimeout(() => {
+                imgElem.src = kaderSlides[currentKaderIndex].url;
+                imgElem.style.opacity = 1;
+            }, 200);
+        }
+        function nextKaderSlide() { showKaderSlide(currentKaderIndex + 1); resetKaderTimer(); }
+        function prevKaderSlide() { showKaderSlide(currentKaderIndex - 1); resetKaderTimer(); }
+        function resetKaderTimer() {
+            clearInterval(kaderInterval);
+            kaderInterval = setInterval(() => { showKaderSlide(currentKaderIndex + 1); }, 6000);
+        }
 
-        container.innerHTML = htmlItems;
-        tickerBar.style.display = 'block';
-    }
-
-    async function checkAllGoalsAndNotify(home, away, hScore, aScore, latestScorer, matchId) {
-        if (!latestScorer || latestScorer.includes("Tor") || latestScorer.trim() === "⚽") return;
-
-        let uniqueGoalId = `${matchId}_${hScore}:${aScore}_${latestScorer}`;
-        
-        let cleanPlayer = latestScorer.replace(/⚽\s*/, '').replace(/\(\d+['']\)/, '').replace('(Pen)', '').replace('(ET)', '').trim();
-        let minStr = latestScorer.match(/\(\d+['']\)/) ? ` ${latestScorer.match(/\(\d+['']\)/)[0]}` : '';
-
-        let goalObject = {
-            id: uniqueGoalId,
-            text: `<strong>${hScore}:${aScore}</strong> — ${home} vs ${away} (${cleanPlayer}${minStr})`
+        const legendenInfos = {
+            "Volker Finke": "Volker Finke prägte den SC Freiburg von 1991 bis 2007 als Jahrhunderttrainer. Er führte den Sport-Club erstmals in die Bundesliga und etablierte die berühmte Freiburger Fußballschnule.",
+            "Christian Streich": "Christian Streich war von 2011 bis 2024 der prägende Kult-Trainer des SC Freiburg. Mit seiner emotionalen, gradlinigen Art führte er den Klub in den Europapokal und bis ins DFB-Pokalfinale.",
+            "Nils Petersen": "Nils Petersen ist die unangefochtene Bundesliga-Tore-Ikone des SC Freiburg. Als genialer Joker und treffsicherer Stürmer schrieb er jahrelang Geschichte im Breisgau.",
+            "Vincenzo Grifo": "Vincenzo Grifo ist der absolute Spielgestalter, Standardspezialist und Publikumsliebling im aktuellen SCF-Team mit Scorerpunkten für die Geschichtsbücher."
         };
 
-        if (!recentGoalsList.some(g => g.id === uniqueGoalId)) {
-            recentGoalsList.unshift(goalObject);
-            if (recentGoalsList.length > 5) recentGoalsList = recentGoalsList.slice(0, 5);
-            localStorage.setItem('scf_recent_goals_cache', JSON.stringify(recentGoalsList));
-            renderRecentGoalsTicker();
+        function openLegendModal(name) {
+            document.getElementById('legendModalTitle').textContent = "⭐ " + name;
+            document.getElementById('legendModalText').textContent = legendenInfos[name] || "Informationen zu dieser SC Freiburg-Legende.";
+            document.getElementById('legendModal').style.display = 'flex';
         }
 
-        try {
-            let { data: existing, error: checkError } = await supabaseClient
-                .from('send_goals_freiburg')
-                .select('goal_id')
-                .eq('goal_id', uniqueGoalId)
-                .maybeSingle();
-
-            if (!existing && !checkError) {
-                let { error: insertError } = await supabaseClient
-                    .from('send_goals_freiburg')
-                    .insert([{ goal_id: uniqueGoalId }]);
-
-                if (!insertError) {
-                    await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
-                        method: 'POST',
-                        mode: 'cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            table: 'push_subscriptions_scf',
-                            title: `⚽ TOR! (${hScore}:${aScore})`,
-                            body: `${home} vs ${away}\nTorschütze: ${cleanPlayer}${minStr}`
-                        })
-                    });
-                }
-            }
-        } catch (e) {
-            console.error("Fehler beim Freiburg Tor-Cache:", e);
-        }
-    }
-
-    // 15-Minuten-Vorwarnungs-Push
-    function checkUpcomingMatchdayPush() {
-        let now = new Date();
-
-        for (let mDay in leagueMatches) {
-            let matches = leagueMatches[mDay];
-            if (!Array.isArray(matches)) continue;
-
-            matches.forEach(m => {
-                if (!m.dateTime) return;
-
-                let matchTime = new Date(m.dateTime);
-                let diffMs = matchTime - now;
-                let diffMinutes = Math.round(diffMs / 60000);
-
-                if (diffMinutes >= 14 && diffMinutes <= 16) {
-                    let uniquePushKey = `upcoming_15min_scf_${m.matchday || mDay}_${m.home}_${m.away}`;
-
-                    if (!pushedUpcomingMatchdayKeys.has(uniquePushKey)) {
-                        pushedUpcomingMatchdayKeys.add(uniquePushKey);
-                        sendAutomatedUpcomingPush();
-                    }
-                }
-            });
-        }
-    }
-
-    async function sendAutomatedUpcomingPush() {
-        try {
-            await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    table: 'push_subscriptions_scf',
-                    title: '⚽ Bundesliga-Hinweis',
-                    body: 'Live Spiele in der 1. Liga stehen an'
-                })
-            });
-        } catch (e) {
-            console.error("Fehler beim Senden des Vorwarnungs-Push:", e);
-        }
-    }
-
-    function toggleAdminMode() {
-        const adminCard = document.getElementById('adminCard');
-        if (isAdmin) {
-            isAdmin = false;
-            adminCard.style.display = 'none';
-            return;
-        }
-        let enteredPin = prompt("Bitte Admin-PIN eingeben:");
-        if (enteredPin === ADMIN_PIN) {
-            isAdmin = true;
-            adminCard.style.display = 'block';
-            alert("Admin-Modus erfolgreich aktiviert!");
-        } else if (enteredPin !== null) {
-            alert("Falsche PIN!");
-        }
-    }
-
-    async function loadEspnMatchdayData(showAlert = false) {
-        try {
-            let logosRes = await supabaseClient.from('bundesliga_vereins_logos').select('*');
-            if (logosRes.data) {
-                teamLogos = {};
-                logosRes.data.forEach(item => {
-                    if (item.team_name && item.logo_url) {
-                        teamLogos[item.team_name.trim().toLowerCase()] = item.logo_url;
-                    }
-                });
-            }
-
-            leagueMatches = {};
-            let hasLive = false;
-
-            for (let s = 1; s <= 34; s++) {
-                let fri = matchdayFridays[s] || "2026-08-28";
-                let dObj = new Date(fri);
-                let datesToFetch = [];
-
-                for (let i = 0; i < 4; i++) {
-                    let d = new Date(dObj);
-                    d.setDate(dObj.getDate() + i);
-                    let y = d.getFullYear();
-                    let m = String(d.getMonth() + 1).padStart(2, '0');
-                    let day = String(d.getDate()).padStart(2, '0');
-                    datesToFetch.push(`${y}${m}${day}`);
-                }
-
-                const promises = datesToFetch.map(dateStr => 
-                    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/scoreboard?dates=${dateStr}`)
-                        .then(res => res.json())
-                        .then(data => data.events || [])
-                        .catch(() => [])
-                );
-
-                const results = await Promise.all(promises);
-                let events = results.flat();
-
-                leagueMatches[s] = [];
-                events.forEach(ev => {
-                    const comp = ev.competitions?.[0];
-                    if (!comp) return;
-
-                    const homeComp = comp.competitors.find(c => c.homeAway === 'home');
-                    const awayComp = comp.competitors.find(c => c.homeAway === 'away');
-                    if (!homeComp || !awayComp) return;
-
-                    if (homeComp.team.logo) teamLogos[homeComp.team.displayName.trim().toLowerCase()] = homeComp.team.logo;
-                    if (awayComp.team.logo) teamLogos[awayComp.team.displayName.trim().toLowerCase()] = awayComp.team.logo;
-
-                    const statusType = ev.status.type.state;
-                    const isLive = statusType === 'in';
-                    if (isLive) hasLive = true;
-
-                    let displayClock = ev.status?.displayClock || "";
-
-                    let matchDateObj = new Date(ev.date);
-                    let dateStr = ev.date ? ev.date.split('T')[0] : fri;
-                    let timeStr = !isNaN(matchDateObj.getTime()) ? matchDateObj.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : "15:30";
-
-                    let goalsHome = [];
-                    let goalsAway = [];
-                    let latestScorerText = "";
-
-                    let homeScoreVal = homeComp.score !== undefined && homeComp.score !== "" && statusType !== 'pre' ? parseInt(homeComp.score) : null;
-                    let awayScoreVal = awayComp.score !== undefined && awayComp.score !== "" && statusType !== 'pre' ? parseInt(awayComp.score) : null;
-                    
-                    let matchId = 'espn_' + ev.id;
-
-                    if (comp.details && Array.isArray(comp.details)) {
-                        comp.details.forEach(detail => {
-                            let typeText = (detail.type && detail.type.text) ? detail.type.text.toLowerCase() : "";
-                            let playerName = detail.scorer?.athlete?.displayName 
-                                || detail.athlete?.displayName 
-                                || detail.player?.displayName
-                                || (detail.athletesInvolved && detail.athletesInvolved[0]?.displayName)
-                                || "";
-
-                            if (!playerName && detail.text) {
-                                let cleanText = detail.text.replace(/scored.*$/, '').trim();
-                                if (cleanText && cleanText.toLowerCase() !== 'goal') {
-                                    playerName = cleanText;
-                                }
-                            }
-
-                            if (!playerName) {
-                                playerName = detail.team?.displayName || "Aktion";
-                            }
-
-                            let clock = detail.clock?.displayValue || "";
-                            let minuteStr = clock ? ` (${clock}')` : '';
-
-                            if (detail.type?.text === "Goal" || detail.scoringPlay || detail.goalValue > 0 || typeText.includes("goal")) {
-                                let notes = "";
-                                if (detail.penalty) notes = " (Pen)";
-                                if (detail.ownGoal) notes = " (ET)";
-
-                                let goalEntry = `⚽ ${playerName}${minuteStr}${notes}`;
-                                latestScorerText = goalEntry;
-
-                                if (detail.team?.id === homeComp.team.id) {
-                                    goalsHome.push(goalEntry);
-                                } else if (detail.team?.id === awayComp.team.id) {
-                                    goalsAway.push(goalEntry);
-                                }
-                            } else if (typeText.includes("yellow-red") || typeText.includes("gelb-rot")) {
-                                let cardEntry = `🟨🟥 ${playerName}${minuteStr}`;
-                                if (detail.team?.id === homeComp.team.id) goalsHome.push(cardEntry);
-                                else if (detail.team?.id === awayComp.team.id) goalsAway.push(cardEntry);
-                            } else if (typeText.includes("yellow") || typeText.includes("gelbe karte")) {
-                                let cardEntry = `🟨 ${playerName}${minuteStr}`;
-                                if (detail.team?.id === homeComp.team.id) goalsHome.push(cardEntry);
-                                else if (detail.team?.id === awayComp.team.id) goalsAway.push(cardEntry);
-                            } else if (typeText.includes("red") || typeText.includes("rote karte")) {
-                                let cardEntry = `🟥 ${playerName}${minuteStr}`;
-                                if (detail.team?.id === homeComp.team.id) goalsHome.push(cardEntry);
-                                else if (detail.team?.id === awayComp.team.id) goalsAway.push(cardEntry);
-                            }
-                        });
-                    }
-
-                    if (homeScoreVal !== null && awayScoreVal !== null) {
-                        let prev = previousEspnScores[matchId];
-                        if (prev !== undefined && isLive) {
-                            if (homeScoreVal > prev.home || awayScoreVal > prev.away) {
-                                checkAllGoalsAndNotify(homeComp.team.displayName, awayComp.team.displayName, homeScoreVal, awayScoreVal, latestScorerText, matchId);
-                            }
-                        }
-                        previousEspnScores[matchId] = { home: homeScoreVal, away: awayScoreVal };
-                    }
-
-                    leagueMatches[s].push({
-                        home: homeComp.team.displayName,
-                        away: awayComp.team.displayName,
-                        date: dateStr,
-                        time: timeStr,
-                        homeScore: homeScoreVal,
-                        awayScore: awayScoreVal,
-                        isFinished: statusType === 'post',
-                        isLive: isLive,
-                        displayClock: displayClock,
-                        dateTime: ev.date,
-                        goalsHome: goalsHome,
-                        goalsAway: goalsAway
-                    });
-                });
-
-                leagueMatches[s].sort((a, b) => new Date(a.dateTime || 0) - new Date(b.dateTime || 0));
-            }
-
-            let liveBadge = document.getElementById('liveIndicatorBadge');
-            if (liveBadge) liveBadge.style.display = hasLive ? 'flex' : 'none';
-
-            if (!isInitialized) {
-                isInitialized = true;
-                let targetMatchday = 7; 
-                for (let s = 1; s <= 34; s++) {
-                    let matches = leagueMatches[s] || [];
-                    let hasUnfinished = matches.some(m => !m.isFinished);
-                    if (hasUnfinished || s === 34) {
-                        targetMatchday = s;
-                        break;
-                    }
-                }
-                currentMatchday = targetMatchday;
-            }
-
-            if (showAlert) alert("ESPN Live-Daten erfolgreich synchronisiert!");
-        } catch (e) {
-            console.error("Fehler beim ESPN Sync:", e);
-            if (showAlert) alert("Fehler beim Laden der ESPN-Daten.");
+        const historieFakten = [
+            "Der SC Freiburg wurde am 30. Mai 1904 gegründet.",
+            "Das moderne Europa-Park Stadion bietet Platz für 34.700 Zuschauer und ersetzte das traditionsreiche Dreisamstadion.",
+            "Die Freiburger Fußballschnule gilt bundesweit als eine der besten Talentschmieden im Profifußball.",
+            "2022 erreichte der SC Freiburg erstmals das DFB-Pokalfinale in Berlin."
+        ];
+        let historieIdx = 0;
+        function nextHistorieFakt() {
+            historieIdx = (historieIdx + 1) % historieFakten.length;
+            document.getElementById('historieWidget').textContent = `"${historieFakten[historieIdx]}"`;
         }
 
-        renderAll();
-        checkUpcomingMatchdayPush();
-    }
-
-    function changeMatchday(amount) {
-        currentMatchday = Math.max(1, Math.min(34, currentMatchday + amount));
-        renderAll();
-    }
-
-    function renderAll() {
-        document.getElementById('matchdayDisplay').textContent = "Spieltag " + currentMatchday;
-        document.getElementById('matchdayTableHeader').textContent = "Spieltag " + currentMatchday + " — Spiele & Ergebnisse";
-        
-        renderMatchdayTable();
-        renderTable();
-        renderScfStats();
-        updateWidgets();
-        renderRecentGoalsTicker();
-    }
-
-    function updateWidgets() {
-        let allScfMatches = [];
-        for (let mDay in leagueMatches) {
-            let matches = leagueMatches[mDay];
-            if (Array.isArray(matches)) {
-                matches.forEach(m => {
-                    if (m.home.toLowerCase().includes('freiburg') || m.away.toLowerCase().includes('freiburg')) {
-                        allScfMatches.push(Object.assign({ matchday: parseInt(mDay) }, m));
-                    }
-                });
-            }
-        }
-        allScfMatches.sort((a, b) => new Date(a.dateTime || 0) - new Date(b.dateTime || 0));
-
-        let now = new Date();
-        let nextMatch = allScfMatches.find(m => new Date(m.dateTime || 0) >= now && (m.homeScore === null || m.homeScore === undefined));
-        let pastMatches = allScfMatches.filter(m => m.homeScore !== null && m.homeScore !== undefined);
-        let lastMatch = pastMatches.length > 0 ? pastMatches[pastMatches.length - 1] : null;
-
-        let nextWidget = document.getElementById('nextMatchWidget');
-        if (nextMatch && nextMatch.dateTime) {
-            nextMatchDateTime = new Date(nextMatch.dateTime);
-            let dt = nextMatch.date ? nextMatch.date.split('-').reverse().join('.') : '';
-            nextWidget.innerHTML = `<strong>ST ${nextMatch.matchday}</strong> — ${dt} ${nextMatch.time || ''}<br><div style="margin-top:4px; font-weight:bold;">${nextMatch.home} vs ${nextMatch.away}</div><div id="matchCountdown" style="margin-top:6px; font-size:0.8rem; color:var(--scf-bright-red);"></div>`;
+        async function init() {
+            initVisitorCounter();
             updateCountdown();
-        } else {
-            nextWidget.innerHTML = "Kein anstehendes Spiel gefunden.";
-            nextMatchDateTime = null;
+            showSlide(0); resetTimer();
+            showKaderSlide(0); resetKaderTimer();
+
+            await checkApiStatus();
+            await loadRounds();
+            loadTable();
+            loadTopScorers();
+            loadTopAssists();
+            loadYellowCards();
         }
 
-        let lastWidget = document.getElementById('lastMatchWidget');
-        if (lastMatch) {
-            let dt = lastMatch.date ? lastMatch.date.split('-').reverse().join('.') : '';
-            lastWidget.innerHTML = `<strong>ST ${lastMatch.matchday}</strong> (${dt})<br><div style="margin-top:6px; font-weight:bold;">${lastMatch.home} ${lastMatch.homeScore}:${lastMatch.awayScore} ${lastMatch.away}</div>`;
-        } else {
-            lastWidget.innerHTML = "Noch kein beendetes Spiel.";
-        }
-
-        let formWidget = document.getElementById('formCurveWidget');
-        if (pastMatches.length > 0) {
-            let last15 = pastMatches.slice(-15);
-            let badges = last15.map(m => {
-                let isHome = m.home.toLowerCase().includes('freiburg');
-                let myG = isHome ? m.homeScore : m.awayScore;
-                let oppG = isHome ? m.awayScore : m.homeScore;
-                if (myG > oppG) return '<span style="background:#2ea043; color:#fff; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; font-size:0.8rem;">S</span>';
-                else if (myG === oppG) return '<span style="background:#e3b341; color:#000; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; font-size:0.8rem;">U</span>';
-                else return '<span style="background:#f85149; color:#fff; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; font-size:0.8rem;">N</span>';
-            }).join(' ');
-            formWidget.innerHTML = badges;
-        } else {
-            formWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine beendeten Spiele</span>';
-        }
-
-        let scfScorersMap = {};
-        pastMatches.forEach(m => {
-            let parseScorers = (gList, teamName) => {
-                if (teamName.toLowerCase().includes('freiburg') && Array.isArray(gList)) {
-                    gList.forEach(g => {
-                        if (g.startsWith('⚽')) {
-                            let clean = g.replace('⚽', '').replace('(Pen)', '').replace('(ET)', '').trim();
-                            let name = clean.split('(')[0].trim();
-                            if (name) {
-                                scfScorersMap[name] = (scfScorersMap[name] || 0) + 1;
-                            }
-                        }
-                    });
+        async function checkApiStatus() {
+            const banner = document.getElementById("apiStatusBanner");
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/status`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                if(data.response && data.response.account) {
+                    const acc = data.response.account;
+                    banner.innerHTML = `<span>🟢 API-Football PRO Aktiv (${acc.firstname})</span><span>Anfragen heute: <b>${data.response.requests.current} / ${data.response.requests.limit_day}</b></span>`;
                 }
-            };
-            parseScorers(m.goalsHome, m.home);
-            parseScorers(m.goalsAway, m.away);
-        });
-
-        let sortedScorers = Object.keys(scfScorersMap).map(name => ({ name: name, goals: scfScorersMap[name] }));
-        sortedScorers.sort((a, b) => b.goals - a.goals);
-        let top3 = sortedScorers.slice(0, 3);
-
-        let topScorersWidget = document.getElementById('topScorersWidget');
-        if (top3.length > 0) {
-            let html = '<div style="display:flex; flex-direction:column; gap:4px;">';
-            top3.forEach((s, idx) => {
-                let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : '🥉');
-                html += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; background:#241414; padding:4px 8px; border-radius:4px;"><span>${medal} ${s.name}</span><strong style="color:var(--scf-bright-red);">${s.goals} Tore</strong></div>`;
-            });
-            html += '</div>';
-            topScorersWidget.innerHTML = html;
-        } else {
-            topScorersWidget.innerHTML = '<span style="color:var(--text-muted); font-size:0.85rem;">Noch keine Torschützen erfasst</span>';
+            } catch(e) {
+                banner.innerHTML = `<span style="color:#ff3333;">❌ Verbindungsfehler zur API</span>`;
+            }
         }
 
-        let formStats = {};
-        let allTeams = [];
-        Object.values(leagueMatches).forEach(matchList => {
-            if (Array.isArray(matchList)) {
-                matchList.forEach(m => {
-                    if (!allTeams.includes(m.home)) allTeams.push(m.home);
-                    if (!allTeams.includes(m.away)) allTeams.push(m.away);
+        function toggleAdminMode() {
+            const adminCard = document.getElementById('adminCard');
+            if (isAdmin) {
+                isAdmin = false;
+                adminCard.style.display = 'none';
+                return;
+            }
+            let enteredPin = prompt("Bitte Admin-PIN eingeben:");
+            if (enteredPin === ADMIN_PIN) {
+                isAdmin = true;
+                adminCard.style.display = 'block';
+                alert("Admin-Modus erfolgreich aktiviert!");
+            } else if (enteredPin !== null) {
+                alert("Falsche PIN!");
+            }
+        }
+
+        async function sendTestPush() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        table: 'push_subscriptions_scf',
+                        title: "⚽ SC Freiburg Tor-Alarm (Test)",
+                        body: "Test-Alarm über Supabase Edge Function erfolgreich ausgelöst!"
+                    })
                 });
-            }
-        });
-        allTeams.forEach(t => { formStats[t] = { name: t, matches: [] }; });
-
-        Object.values(leagueMatches).forEach(matchList => {
-            if (!Array.isArray(matchList)) return;
-            matchList.forEach(m => {
-                if (m.homeScore === undefined || m.homeScore === null || m.awayScore === undefined || m.awayScore === null) return;
-                let h = m.home, a = m.away;
-                if (!formStats[h] || !formStats[a]) return;
-                formStats[h].matches.push({ date: m.dateTime || m.date, result: m.homeScore > m.awayScore ? 'S' : (m.homeScore === m.awayScore ? 'U' : 'N'), gf: m.homeScore, ga: m.awayScore, pts: m.homeScore > m.awayScore ? 3 : (m.homeScore === m.awayScore ? 1 : 0) });
-                formStats[a].matches.push({ date: m.dateTime || m.date, result: m.awayScore > m.homeScore ? 'S' : (m.awayScore === m.homeScore ? 'U' : 'N'), gf: m.awayScore, ga: m.homeScore, pts: m.awayScore > m.homeScore ? 3 : (m.awayScore === m.homeScore ? 1 : 0) });
-            });
-        });
-
-        let formList = Object.values(formStats).map(team => {
-            team.matches.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
-            let last5 = team.matches.slice(0, 5);
-            let formPts = last5.reduce((sum, item) => sum + item.pts, 0);
-            let gf = last5.reduce((sum, item) => sum + item.gf, 0);
-            let ga = last5.reduce((sum, item) => sum + item.ga, 0);
-            return { name: team.name, last5: last5, formPts: formPts, gf: gf, ga: ga };
-        });
-        formList.sort((a,b) => b.formPts - a.formPts);
-        let formKing = formList.length > 0 ? formList[0] : null;
-
-        let kingBadges = "";
-        if (formKing && formKing.last5.length > 0) {
-            kingBadges = formKing.last5.map(m => {
-                let bg = m.result === 'S' ? '#2ea043' : (m.result === 'U' ? '#e3b341' : '#f85149');
-                let color = m.result === 'U' ? '#000' : '#fff';
-                return `<span style="background:${bg}; color:${color}; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; font-weight:bold; font-size:0.75rem;">${m.result}</span>`;
-            }).reverse().join(' ');
-        }
-
-        let kingLogoUrl = formKing ? (teamLogos[formKing.name.trim().toLowerCase()] || "") : "";
-        let kingLogoHtml = kingLogoUrl ? `<img src="${kingLogoUrl}" alt="${formKing.name}" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin-right: 8px;">` : '';
-
-        let formWidgetContent = document.getElementById('formKingWidget');
-        if (formKing) {
-            formWidgetContent.innerHTML = `
-                <div style="display:flex; align-items:center; margin-bottom:12px;">${kingLogoHtml}<span style="font-size:1.05rem; font-weight:bold; color:#ffffff;">${formKing.name}</span></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.9rem;"><span style="color:var(--text-muted);">Punkte (L5):</span><strong style="color:#3fb950;">${formKing.formPts} Pkt</strong></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.9rem;"><span style="color:var(--text-muted);">Tore (L5):</span><strong style="color:#e3b341;">${formKing.gf}:${formKing.ga}</strong></div>
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;"><span style="color:var(--text-muted);">Serie:</span><div style="display:flex; gap:4px;">${kingBadges || '<span style="color:var(--text-muted)">-</span>'}</div></div>
-            `;
-        } else {
-            formWidgetContent.innerHTML = "Keine Daten verfügbar.";
-        }
-    }
-
-    function updateCountdown() {
-        if (!nextMatchDateTime) return;
-        let now = new Date();
-        let diff = nextMatchDateTime - now;
-        let cdElem = document.getElementById('matchCountdown');
-        if (!cdElem) return;
-
-        if (diff <= 0) {
-            cdElem.textContent = "🔴 Spiel läuft oder hat begonnen!";
-            return;
-        }
-
-        let days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        cdElem.textContent = `⏳ Noch ${days}T ${hours}Std ${minutes}Min ${seconds}Sek`;
-    }
-    setInterval(updateCountdown, 1000);
-
-    function getTeamHtml(teamName, alignRight = false, goals = []) {
-        let logoUrl = teamLogos[teamName.trim().toLowerCase()] || "";
-        let logoHtml = logoUrl ? '<img src="' + logoUrl + '" alt="' + teamName + '" class="team-mini-logo">' : '';
-
-        let goalsHtml = '';
-        if (goals && goals.length > 0) {
-            let alignmentStyle = alignRight ? 'text-align: right;' : 'text-align: left;';
-            let indentStyle = alignRight ? 'padding-right: 30px;' : 'padding-left: 30px;';
-            goalsHtml = `<div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; line-height: 1.3; ${alignmentStyle} ${indentStyle}">${goals.join('<br>')}</div>`;
-        }
-
-        if (alignRight) {
-            return `<div style="display: flex; flex-direction: column;"><div class="team-cell right"><span>${teamName}</span>${logoHtml}</div>${goalsHtml}</div>`;
-        } else {
-            return `<div style="display: flex; flex-direction: column;"><div class="team-cell">${logoHtml}<span>${teamName}</span></div>${goalsHtml}</div>`;
-        }
-    }
-
-    async function openLeagueScorersModal() {
-        let tbody = document.getElementById('leagueScorersModalBody');
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Lade Torschützen...</td></tr>`;
-        document.getElementById('leagueScorersModal').style.display = 'flex';
-
-        let scorersMap = {};
-        for (let mDay in leagueMatches) {
-            let list = leagueMatches[mDay];
-            if (Array.isArray(list)) {
-                list.forEach(m => {
-                    let parse = (gList, team) => {
-                        gList.forEach(g => {
-                            if (g.startsWith('⚽')) {
-                                let clean = g.replace('⚽', '').replace('(Pen)', '').replace('(ET)', '').trim();
-                                let name = clean.split('(')[0].trim();
-                                if (name) {
-                                    if (!scorersMap[name]) scorersMap[name] = { count: 0, team: team };
-                                    scorersMap[name].count++;
-                                }
-                            }
-                        });
-                    };
-                    if (m.goalsHome) parse(m.goalsHome, m.home);
-                    if (m.goalsAway) parse(m.goalsAway, m.away);
-                });
+                if (response.ok) alert("Test-Push erfolgreich ausgelöst!");
+                else alert("Fehler von der Edge Function.");
+            } catch (e) {
+                alert("Netzwerkfehler: " + e.message);
             }
         }
 
-        let scorersArray = Object.keys(scorersMap).map(name => ({
-            name: name,
-            goals: scorersMap[name].count,
-            team: scorersMap[name].team
-        }));
-
-        tbody.innerHTML = '';
-        if (scorersArray.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">Noch keine Torschützen erfasst.</td></tr>`;
-        } else {
-            scorersArray.sort((a, b) => b.goals - a.goals);
-            scorersArray.forEach((s, idx) => {
-                let tr = document.createElement('tr');
-                let logoUrl = teamLogos[s.team.trim().toLowerCase()] || "";
-                let logoHtml = logoUrl ? '<img src="' + logoUrl + '" alt="' + s.team + '" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; margin-right: 4px;">' : '';
-                tr.innerHTML = `
-                    <td style="text-align: center; font-weight: bold; color: var(--scf-bright-red);">${idx + 1}.</td>
-                    <td>
-                        <div style="font-weight: bold; color: #ffffff;">${s.name}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 4px;">${logoHtml}<span>${s.team}</span></div>
-                    </td>
-                    <td style="text-align: center; font-weight: bold; color: var(--scf-bright-red); font-size: 1.1rem;">${s.goals}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-    }
-
-    function closeLeagueScorersModal() { document.getElementById('leagueScorersModal').style.display = 'none'; }
-
-    function openScfMatchesModal() {
-        let modalBody = document.getElementById('scfMatchesModalBody');
-        modalBody.innerHTML = '';
-
-        let scfMatches = [];
-        for (let mDay in leagueMatches) {
-            let matchesArr = leagueMatches[mDay];
-            if (Array.isArray(matchesArr)) {
-                matchesArr.forEach(m => {
-                    if (m.home.toLowerCase().includes('freiburg') || m.away.toLowerCase().includes('freiburg')) {
-                        scfMatches.push(Object.assign({ matchday: parseInt(mDay) }, m));
-                    }
-                });
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
             }
-        }
-        scfMatches.sort((a, b) => a.matchday - b.matchday);
-
-        scfMatches.forEach(m => {
-            let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
-            let isHome = m.home.toLowerCase().includes('freiburg');
-            
-            let trClass = '';
-            if (hasResult) {
-                let scfGoals = isHome ? m.homeScore : m.awayScore;
-                let oppGoals = isHome ? m.awayScore : m.homeScore;
-                if (scfGoals > oppGoals) trClass = 'match-win';
-                else if (scfGoals === oppGoals) trClass = 'match-draw';
-                else trClass = 'match-loss';
-            }
-
-            let homeCellHtml = getTeamHtml(m.home, true);
-            let awayCellHtml = getTeamHtml(m.away, false);
-            if (m.home.toLowerCase().includes('freiburg')) homeCellHtml = '<span class="scf-highlight">' + homeCellHtml + '</span>';
-            if (m.away.toLowerCase().includes('freiburg')) awayCellHtml = '<span class="scf-highlight">' + awayCellHtml + '</span>';
-
-            let resultDisplay = hasResult ? '<strong>' + m.homeScore + ':' + m.awayScore + '</strong>' : '<span style="color:var(--text-muted);">-:-</span>';
-            let formattedDate = m.date ? m.date.split('-').reverse().join('.') : 'Offen';
-
-            let tr = document.createElement('tr');
-            if (trClass) tr.classList.add(trClass);
-            tr.innerHTML = `
-                <td style="text-align: center; color: var(--scf-bright-red); font-weight: bold;">ST ${m.matchday}</td>
-                <td style="font-size: 0.8rem; color: var(--text-muted);">${formattedDate}</td>
-                <td style="text-align: right;">${homeCellHtml}</td>
-                <td style="text-align: center;">${resultDisplay}</td>
-                <td>${awayCellHtml}</td>
-            `;
-            modalBody.appendChild(tr);
-        });
-
-        document.getElementById('scfMatchesModal').style.display = 'flex';
-    }
-
-    function closeScfMatchesModal() { document.getElementById('scfMatchesModal').style.display = 'none'; }
-
-    function renderMatchdayTable() {
-        let tbody = document.getElementById('matchdayTableBody');
-        tbody.innerHTML = '';
-        let existingMatches = leagueMatches[currentMatchday] || [];
-
-        if (existingMatches.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 20px;">Keine Spiele für Spieltag ' + currentMatchday + ' gefunden.</td></tr>';
-            return;
+            return outputArray;
         }
 
-        existingMatches.forEach(m => {
-            let hasResult = m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null;
-            let formattedDate = m.date ? m.date.split('-').reverse().join('.') : '-';
-            let timeStr = m.time ? ' ' + m.time + ' Uhr' : '';
-            let isScfMatch = (m.home.toLowerCase().includes('freiburg') || m.away.toLowerCase().includes('freiburg'));
-
-            let resultDisplay = hasResult ? '<strong>' + m.homeScore + ':' + m.awayScore + '</strong>' : '<span style="color: var(--text-muted); font-style: italic;">vs</span>';
-            if (m.isLive) {
-                let clockText = m.displayClock ? ` (${m.displayClock}')` : '';
-                resultDisplay += `<div style="font-size: 0.65rem; color: var(--scf-bright-red); font-weight: bold; margin-top: 2px; text-align: center;">🔴 LIVE${clockText}</div>`;
-            } else if (m.isFinished) {
-                resultDisplay += '<div style="font-size: 0.65rem; color: #3fb950; margin-top: 2px; text-align: center;">(Endstand)</div>';
+        async function subscribePush() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                alert("Push-Benachrichtigungen werden von diesem Browser leider nicht unterstützt.");
+                return;
             }
-
-            let tr = document.createElement('tr');
-            if (isScfMatch) tr.classList.add('scf-match-row');
-
-            let homeCellContent = getTeamHtml(m.home, true, m.goalsHome);
-            let awayCellContent = getTeamHtml(m.away, false, m.goalsAway);
-
-            if (m.home.toLowerCase().includes('freiburg')) homeCellContent = '<span class="scf-highlight">' + homeCellContent + '</span>';
-            if (m.away.toLowerCase().includes('freiburg')) awayCellContent = '<span class="scf-highlight">' + awayCellContent + '</span>';
-
-            tr.innerHTML = `
-                <td style="font-size: 0.8rem; color: #ffffff; vertical-align: top;">${formattedDate}${timeStr}</td>
-                <td style="text-align: right; vertical-align: top;">${homeCellContent}</td>
-                <td style="text-align: center; vertical-align: middle;">${resultDisplay}</td>
-                <td style="text-align: left; vertical-align: top;">${awayCellContent}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function renderTable() {
-        let tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
-        let stats = {};
-
-        let allTeams = [];
-        Object.values(leagueMatches).forEach(matchList => {
-            if (Array.isArray(matchList)) {
-                matchList.forEach(m => {
-                    if (!allTeams.includes(m.home)) allTeams.push(m.home);
-                    if (!allTeams.includes(m.away)) allTeams.push(m.away);
-                });
-            }
-        });
-
-        allTeams.forEach(t => { stats[t] = { name: t, played: 0, won: 0, draw: 0, lost: 0, goalsFor: 0, goalsAgainst: 0, points: 0 }; });
-
-        Object.values(leagueMatches).forEach(matchList => {
-            if (!Array.isArray(matchList)) return;
-            matchList.forEach(m => {
-                if (m.homeScore === undefined || m.homeScore === null || m.awayScore === undefined || m.awayScore === null) return;
-                let h = m.home, a = m.away;
-                if (!stats[h] || !stats[a]) return;
-                stats[h].played++; stats[a].played++;
-                stats[h].goalsFor += m.homeScore; stats[h].goalsAgainst += m.awayScore;
-                stats[a].goalsFor += m.awayScore; stats[a].goalsAgainst += m.homeScore;
-                if (m.homeScore > m.awayScore) { stats[h].won++; stats[h].points += 3; stats[a].lost++; }
-                else if (m.homeScore < m.awayScore) { stats[a].won++; stats[a].points += 3; stats[h].lost++; }
-                else { stats[h].draw++; stats[h].points += 1; stats[a].draw++; stats[a].points += 1; }
-            });
-        });
-
-        let sorted = Object.values(stats).sort((a, b) => b.points !== a.points ? b.points - a.points : (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst));
-        
-        sorted.forEach((s, idx) => {
-            let tr = document.createElement('tr');
-            let rank = idx + 1;
-            
-            if (rank >= 1 && rank <= 4) tr.classList.add('cl-zone');
-            else if (rank === 5) tr.classList.add('el-zone');
-            else if (rank === 6) tr.classList.add('ecl-zone');
-            else if (rank === 16) tr.classList.add('relegation-zone');
-            else if (rank >= 17) tr.classList.add('relegation-direct-zone');
-
-            if (s.name.toLowerCase().includes('freiburg')) tr.classList.add('scf-team-row');
-            let diff = s.goalsFor - s.goalsAgainst;
-
-            let teamCellHtml = getTeamHtml(s.name, false);
-
-            tr.innerHTML = '<td><strong>' + rank + '.</strong></td><td>' + teamCellHtml + '</td><td style="text-align: center;">' + s.played + '</td><td style="text-align: center;">' + s.won + '</td><td style="text-align: center;">' + s.draw + '</td><td style="text-align: center;">' + s.lost + '</td><td style="text-align: center;">' + s.goalsFor + ':' + s.goalsAgainst + '</td><td style="text-align: center;">' + (diff > 0 ? '+' : '') + diff + '</td><td style="text-align: center; font-weight: bold;">' + s.points + '</td>';
-            tbody.appendChild(tr);
-        });
-    }
-
-    function renderScfStats() {
-        let played = 0, won = 0, draw = 0, lost = 0, goalsFor = 0, goalsAgainst = 0, points = 0;
-        
-        Object.values(leagueMatches).forEach(matchList => {
-            if (!Array.isArray(matchList)) return;
-            matchList.forEach(m => {
-                let isHome = m.home.toLowerCase().includes('freiburg'), isAway = m.away.toLowerCase().includes('freiburg');
-                if (!isHome && !isAway) return;
-                if (m.homeScore !== undefined && m.homeScore !== null && m.awayScore !== undefined && m.awayScore !== null) {
-                    played++;
-                    let myG = isHome ? m.homeScore : m.awayScore, oppG = isHome ? m.awayScore : m.homeScore;
-                    goalsFor += myG; goalsAgainst += oppG;
-                    if (myG > oppG) { won++; points += 3; } else if (myG === oppG) { draw++; points += 1; } else { lost++; }
-                }
-            });
-        });
-
-        document.getElementById('scfStatsGrid').innerHTML = `
-            <div class="stat-card"><div class="stat-label">Spiele</div><div class="stat-value">${played}</div></div>
-            <div class="stat-card"><div class="stat-label">Siege</div><div class="stat-value" style="color: #3fb950;">${won}</div></div>
-            <div class="stat-card"><div class="stat-label">Remis</div><div class="stat-value" style="color: #e3b341;">${draw}</div></div>
-            <div class="stat-card"><div class="stat-label">Niederlagen</div><div class="stat-value" style="color: #f85149;">${lost}</div></div>
-            <div class="stat-card"><div class="stat-label">Tore</div><div class="stat-value">${goalsFor}:${goalsAgainst}</div></div>
-            <div class="stat-card"><div class="stat-label">Punkte</div><div class="stat-value">${points}</div></div>
-        `;
-    }
-
-    // --- Intelligentes Polling (Schont API, wenn kein Spiel live ist) ---
-    let currentIntervalTime = 30000;
-    let mainIntervalHandle = null;
-
-    function setupSmartPolling() {
-        if (mainIntervalHandle) clearInterval(mainIntervalHandle);
-
-        mainIntervalHandle = setInterval(() => {
-            if (!isAdmin) {
-                let hasActiveLiveMatch = false;
-                for (let mDay in leagueMatches) {
-                    let matches = leagueMatches[mDay];
-                    if (Array.isArray(matches)) {
-                        if (matches.some(m => m.isLive)) {
-                            hasActiveLiveMatch = true;
-                            break;
-                        }
-                    }
-                }
-
-                let targetInterval = hasActiveLiveMatch ? 30000 : 600000; // 30 Sek bei Live, 10 Min sonst
-
-                if (currentIntervalTime !== targetInterval) {
-                    currentIntervalTime = targetInterval;
-                    setupSmartPolling();
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    alert("Die Berechtigung für Benachrichtigungen wurde verweigert.");
                     return;
                 }
+                const registration = await navigator.serviceWorker.register('./sw.js');
+                await registration.ready;
 
-                loadEspnMatchdayData();
+                const publicVapidKey = 'BAsnfWgySLti5LzulXfN-xI-x7UDV32LO98YXgg1qdoRY1E1Tl05QPgCvOMgfwe80cSv_K7336-dhJTgBkHUI70';
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+                });
+
+                const p256dh = subscription.getKey('p256dh') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))) : '';
+                const auth = subscription.getKey('auth') ? btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))) : '';
+
+                await supabaseClient.from('push_subscriptions_scf').upsert({
+                    endpoint: subscription.endpoint,
+                    p256dh: p256dh,
+                    auth: auth
+                }, { onConflict: 'endpoint' });
+
+                alert("Supabase Push-Alarm erfolgreich aktiviert!");
+            } catch (error) {
+                console.error('Fehler bei der Push-Registrierung:', error);
+                alert("Fehler beim Aktivieren der Benachrichtigung: " + error.message);
             }
-        }, currentIntervalTime);
-    }
+        }
 
-    window.onclick = function(e) {
-        if (e.target === document.getElementById('scfMatchesModal')) closeScfMatchesModal();
-        if (e.target === document.getElementById('leagueScorersModal')) closeLeagueScorersModal();
-        if (e.target === document.getElementById('legendModal')) closeLegendModal();
-        if (e.target === document.getElementById('cardsModal')) closeCardsModal();
-    }
+        function showGoalAlert(teamName, scorerInfo, matchInfo) {
+            document.getElementById("goalAlertTeam").textContent = `⚽ Tor für ${teamName}!`;
+            document.getElementById("goalAlertScorer").textContent = scorerInfo;
+            document.getElementById("goalAlertMatch").textContent = matchInfo;
+            document.getElementById("goalAlertBanner").style.display = "block";
+            setTimeout(() => { hideGoalAlert(); }, 10000);
+        }
+        function hideGoalAlert() { document.getElementById("goalAlertBanner").style.display = "none"; }
 
-    // INITIALISIERUNG
-    initVisitorCounter();
-    
-    showSlide(0);
-    resetTimer();
+        function manageSmartPolling(hasLiveGames) {
+            if (hasLiveGames && !smartPollingInterval) {
+                smartPollingInterval = setInterval(() => {
+                    if (currentMatchday) loadMatchday(currentMatchday, true);
+                    loadTable();
+                }, 45000);
+            } else if (!hasLiveGames && smartPollingInterval) {
+                clearInterval(smartPollingInterval);
+                smartPollingInterval = null;
+            }
+        }
 
-    showKaderSlide(0);
-    resetKaderTimer();
+        async function loadTopScorers() {
+            const widget = document.getElementById("topScorersWidget");
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/players/topscorers?league=${leagueId}&season=${season}`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                if(data.response && data.response.length > 0) {
+                    globalTopScorers = data.response;
+                    let html = "";
+                    for(let i = 0; i < Math.min(3, globalTopScorers.length); i++) {
+                        let p = globalTopScorers[i];
+                        let goals = p.statistics[0].goals.total ?? 0;
+                        let teamName = p.statistics[0].team.name;
+                        let isScf = teamName.includes("Freiburg");
+                        html += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:4px 0; border-bottom:1px solid var(--border-color);" class="${isScf ? 'scf-highlight' : ''}">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <b>${i+1}.</b>
+                                <img src="${p.player.photo}" style="width:20px; height:20px; border-radius:50%; object-fit:cover;">
+                                <span>${p.player.name}</span>
+                            </div>
+                            <span style="background:#241414; padding:1px 6px; border-radius:4px; font-weight:bold; color:var(--scf-bright-red);">${goals} Tore</span>
+                        </div>`;
+                    }
+                    widget.innerHTML = html;
+                }
+            } catch(e) {}
+        }
 
-    loadEspnMatchdayData().then(() => {
-        setupSmartPolling();
-    });
-</script>
+        async function loadTopAssists() {
+            const widget = document.getElementById("topAssistsWidget");
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/players/topassists?league=${leagueId}&season=${season}`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                if(data.response && data.response.length > 0) {
+                    globalTopAssists = data.response;
+                    let html = "";
+                    for(let i = 0; i < Math.min(3, globalTopAssists.length); i++) {
+                        let p = globalTopAssists[i];
+                        let assists = p.statistics[0].goals.assists ?? 0;
+                        let teamName = p.statistics[0].team.name;
+                        let isScf = teamName.includes("Freiburg");
+                        html += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:4px 0; border-bottom:1px solid var(--border-color);" class="${isScf ? 'scf-highlight' : ''}">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <b>${i+1}.</b>
+                                <img src="${p.player.photo}" style="width:20px; height:20px; border-radius:50%; object-fit:cover;">
+                                <span>${p.player.name}</span>
+                            </div>
+                            <span style="background:#241414; padding:1px 6px; border-radius:4px; font-weight:bold; color:var(--scf-bright-red);">${assists} Assists</span>
+                        </div>`;
+                    }
+                    widget.innerHTML = html;
+                }
+            } catch(e) {}
+        }
 
+        async function loadYellowCards() {
+            const widget = document.getElementById("yellowCardsWidget");
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/players/topyellowcards?league=${leagueId}&season=${season}`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                if(data.response && data.response.length > 0) {
+                    globalYellowCards = data.response;
+                    let html = "";
+                    for(let i = 0; i < Math.min(3, globalYellowCards.length); i++) {
+                        let p = globalYellowCards[i];
+                        let cards = p.statistics[0].cards.yellow ?? 0;
+                        let teamName = p.statistics[0].team.name;
+                        let isScf = teamName.includes("Freiburg");
+                        html += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:4px 0; border-bottom:1px solid var(--border-color);" class="${isScf ? 'scf-highlight' : ''}">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <b>${i+1}.</b>
+                                <img src="${p.player.photo}" style="width:20px; height:20px; border-radius:50%; object-fit:cover;">
+                                <span>${p.player.name}</span>
+                            </div>
+                            <span style="background:#241414; padding:1px 6px; border-radius:4px; font-weight:bold; color:#e3b341;">🟨 ${cards}</span>
+                        </div>`;
+                    }
+                    widget.innerHTML = html;
+                }
+            } catch(e) {}
+        }
+
+        async function openTeamStats(teamId, teamName, teamLogo) {
+            document.getElementById("teamStatsModal").style.display = "flex";
+            document.getElementById("teamStatsHeader").innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><img src="${teamLogo}" style="width:30px; height:30px; object-fit:contain;"><span>Saisonstatistik: ${teamName}</span></div>`;
+            document.getElementById("teamStatsContent").innerHTML = "Lade Team-Daten, Kader & Statistiken von API-Football...";
+
+            try {
+                const [statsRes, teamInfoRes, squadRes] = await Promise.all([
+                    fetch(`https://v3.football.api-sports.io/teams/statistics?league=${leagueId}&season=${season}&team=${teamId}`, { headers: { "x-apisports-key": apiKey } }),
+                    fetch(`https://v3.football.api-sports.io/teams?id=${teamId}`, { headers: { "x-apisports-key": apiKey } }),
+                    fetch(`https://v3.football.api-sports.io/players/squads?team=${teamId}`, { headers: { "x-apisports-key": apiKey } })
+                ]);
+
+                const statsData = await statsRes.json();
+                const teamInfoData = await teamInfoRes.json();
+                const squadData = await squadRes.json();
+
+                let html = "";
+
+                if (teamInfoData.response && teamInfoData.response.length > 0) {
+                    const t = teamInfoData.response[0].team;
+                    const v = teamInfoData.response[0].venue;
+                    const coachName = statsData.response?.coach?.name || "Nicht angegeben";
+                    html += `
+                        <div style="margin-bottom:20px;">
+                            <div style="font-weight:bold; color:var(--scf-bright-red); margin-bottom:8px; font-size:0.9rem; text-transform:uppercase;">1. Stammdaten, Stadion & Trainer</div>
+                            <div style="background:#170d0d; padding:12px; border-radius:8px; border:1px solid var(--border-color); font-size:0.85rem; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                                <div><b>Name:</b> ${t.name} (${t.code || '-'})</div>
+                                <div><b>Gründungsjahr:</b> ${t.founded || '-'}</div>
+                                <div><b>Cheftrainer:</b> 🧑‍🏫 ${coachName}</div>
+                                <div><b>Stadion:</b> ${v.name || '-'}</div>
+                                <div><b>Kapazität:</b> ${v.capacity ? v.capacity.toLocaleString('de-DE') + ' Plätze' : '-'}</div>
+                                <div style="grid-column: span 2;"><b>Adresse:</b> ${v.address || ''}, ${v.city || ''}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (statsData.response) {
+                    const st = statsData.response;
+                    let formStr = st.form || "N/V";
+                    let homeWins = st.fixtures?.wins?.home ?? 0;
+                    let homeDraws = st.fixtures?.draws?.home ?? 0;
+                    let homeLoses = st.fixtures?.loses?.home ?? 0;
+                    let awayWins = st.fixtures?.wins?.away ?? 0;
+                    let awayDraws = st.fixtures?.draws?.away ?? 0;
+                    let awayLoses = st.fixtures?.loses?.away ?? 0;
+                    let cleanSheets = st.clean_sheet?.total || 0;
+                    let failedToScore = st.failed_to_score?.total || 0;
+
+                    html += `
+                        <div style="margin-bottom:20px;">
+                            <div style="font-weight:bold; color:var(--scf-bright-red); margin-bottom:8px; font-size:0.9rem; text-transform:uppercase;">3. Saisondaten & Statistiken</div>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:12px;">
+                                <div style="background:#170d0d; padding:12px; border-radius:8px; border:1px solid var(--border-color);">
+                                    <div style="color:var(--text-muted); font-size:0.8rem;">Formkurve</div>
+                                    <div style="font-size:1.1rem; font-weight:bold; color:var(--scf-bright-red); margin-top:4px; letter-spacing:1px;">${formStr}</div>
+                                </div>
+                                <div style="background:#170d0d; padding:12px; border-radius:8px; border:1px solid var(--border-color);">
+                                    <div style="color:var(--text-muted); font-size:0.8rem;">Heimbilanz (S-U-N)</div>
+                                    <div style="font-size:1.1rem; font-weight:bold; margin-top:4px;">${homeWins}-${homeDraws}-${homeLoses}</div>
+                                </div>
+                                <div style="background:#170d0d; padding:12px; border-radius:8px; border:1px solid var(--border-color);">
+                                    <div style="color:var(--text-muted); font-size:0.8rem;">Auswärtsbilanz (S-U-N)</div>
+                                    <div style="font-size:1.1rem; font-weight:bold; margin-top:4px;">${awayWins}-${awayDraws}-${awayLoses}</div>
+                                </div>
+                                <div style="background:#170d0d; padding:12px; border-radius:8px; border:1px solid var(--border-color);">
+                                    <div style="color:var(--text-muted); font-size:0.8rem;">Clean Sheets / Ohne Tor</div>
+                                    <div style="font-size:1.1rem; font-weight:bold; margin-top:4px;">${cleanSheets} / ${failedToScore}</div>
+                                </div>
+                            </div>
+                    `;
+
+                    if (st.goals && st.goals.for && st.goals.for.minute) {
+                        html += `<h4 style="font-size:0.9rem; color:var(--scf-bright-red); margin:12px 0 6px 0;">Tor-Verteilung nach Minuten</h4>`;
+                        html += `<table><tr><th>Minute</th><th class="center">Tore</th><th class="center">%</th></tr>`;
+                        for (let min in st.goals.for.minute) {
+                            let obj = st.goals.for.minute[min];
+                            html += `<tr><td><b>${min}</b></td><td class="center">${obj.total ?? 0}</td><td class="center">${obj.percentage || '0%'}</td></tr>`;
+                        }
+                        html += `</table>`;
+                    }
+                    html += `</div>`;
+                }
+
+                if (squadData.response && squadData.response.length > 0) {
+                    const players = squadData.response[0].players;
+                    let goalkeepers = players.filter(p => p.position === 'Goalkeeper');
+                    let defenders = players.filter(p => p.position === 'Defender');
+                    let midfielders = players.filter(p => p.position === 'Midfielder');
+                    let attackers = players.filter(p => p.position === 'Attacker');
+
+                    function renderPlayerBadges(list) {
+                        return list.map(p => `<span style="background:#241414; border:1px solid var(--border-color); padding:4px 8px; border-radius:6px; font-size:0.8rem; display:inline-block; margin:3px;">#${p.number !== null ? p.number : '?'} ${p.name} ${p.age ? '('+p.age+' J.)' : ''}</span>`).join(" ");
+                    }
+
+                    html += `
+                        <div>
+                            <div style="font-weight:bold; color:var(--scf-bright-red); margin-bottom:8px; font-size:0.9rem; text-transform:uppercase;">2. Aktueller Kader</div>
+                            <div style="background:#170d0d; padding:15px; border-radius:8px; border:1px solid var(--border-color); display:flex; flex-direction:column; gap:12px; font-size:0.85rem;">
+                                <div><strong style="color:var(--text-muted); display:block; margin-bottom:4px;">Torhüter</strong> ${renderPlayerBadges(goalkeepers)}</div>
+                                <div><strong style="color:var(--text-muted); display:block; margin-bottom:4px;">Abwehr</strong> ${renderPlayerBadges(defenders)}</div>
+                                <div><strong style="color:var(--text-muted); display:block; margin-bottom:4px;">Mittelfeld</strong> ${renderPlayerBadges(midfielders)}</div>
+                                <div><strong style="color:var(--text-muted); display:block; margin-bottom:4px;">Angriff</strong> ${renderPlayerBadges(attackers)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById("teamStatsContent").innerHTML = html || "Keine Statistiken für dieses Team verfügbar.";
+
+            } catch(e) {
+                document.getElementById("teamStatsContent").innerHTML = "Fehler beim Laden der Team-Statistiken.";
+            }
+        }
+
+        function openTopScorersModal() {
+            document.getElementById("scorersModal").style.display = "flex";
+            let html = `<table><tr><th>#</th><th>Spieler</th><th>Team</th><th class="center">Tore</th><th class="center">Elfm.</th></tr>`;
+            globalTopScorers.forEach((p, index) => {
+                let stats = p.statistics[0];
+                let isScf = stats.team.name.includes("Freiburg");
+                html += `<tr class="${isScf ? 'scf-team-row' : ''}"><td><b>${index+1}</b></td><td><div style="display:flex; align-items:center; gap:6px;"><img src="${p.player.photo}" style="width:22px; height:22px; border-radius:50%; object-fit:cover;"><span>${p.player.name}</span></div></td><td><div style="display:flex; align-items:center; gap:6px;"><img src="${stats.team.logo}" style="width:16px; height:16px; object-fit:contain;"><span>${stats.team.name}</span></div></td><td class="center"><b>${stats.goals.total ?? 0}</b></td><td class="center">${stats.goals.penalty ?? 0}</td></tr>`;
+            });
+            document.getElementById("fullScorersContainer").innerHTML = html + `</table>`;
+        }
+
+        function openTopAssistsModal() {
+            document.getElementById("assistsModal").style.display = "flex";
+            let html = `<table><tr><th>#</th><th>Spieler</th><th>Team</th><th class="center">Vorlagen</th></tr>`;
+            globalTopAssists.forEach((p, index) => {
+                let stats = p.statistics[0];
+                let isScf = stats.team.name.includes("Freiburg");
+                html += `<tr class="${isScf ? 'scf-team-row' : ''}"><td><b>${index+1}</b></td><td><div style="display:flex; align-items:center; gap:6px;"><img src="${p.player.photo}" style="width:22px; height:22px; border-radius:50%; object-fit:cover;"><span>${p.player.name}</span></div></td><td><div style="display:flex; align-items:center; gap:6px;"><img src="${stats.team.logo}" style="width:16px; height:16px; object-fit:contain;"><span>${stats.team.name}</span></div></td><td class="center"><b>${stats.goals.assists ?? 0}</b></td></tr>`;
+            });
+            document.getElementById("fullAssistsContainer").innerHTML = html + `</table>`;
+        }
+
+        function openYellowCardsModal() {
+            document.getElementById("yellowCardsModal").style.display = "flex";
+            let html = `<table><tr><th>#</th><th>Spieler</th><th>Team</th><th class="center">Gelb</th><th class="center">Gelb-Rot</th><th class="center">Rot</th></tr>`;
+            globalYellowCards.forEach((p, index) => {
+                let stats = p.statistics[0];
+                let isScf = stats.team.name.includes("Freiburg");
+                html += `<tr class="${isScf ? 'scf-team-row' : ''}"><td><b>${index+1}</b></td><td><div style="display:flex; align-items:center; gap:6px;"><img src="${p.player.photo}" style="width:22px; height:22px; border-radius:50%; object-fit:cover;"><span>${p.player.name}</span></div></td><td><div style="display:flex; align-items:center; gap:6px;"><img src="${stats.team.logo}" style="width:16px; height:16px; object-fit:contain;"><span>${stats.team.name}</span></div></td><td class="center"><b>${stats.cards.yellow ?? 0}</b></td><td class="center">${stats.cards.yellowred ?? 0}</td><td class="center">${stats.cards.red ?? 0}</td></tr>`;
+            });
+            document.getElementById("fullYellowCardsContainer").innerHTML = html + `</table>`;
+        }
+
+        function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+
+        async function loadRounds() {
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/fixtures/rounds?league=${leagueId}&season=${season}`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                const select = document.getElementById("matchdaySelect");
+                select.innerHTML = "";
+                if(data.response) {
+                    data.response.forEach(round => {
+                        const opt = document.createElement("option");
+                        opt.value = round;
+                        opt.textContent = round.replace("Regular Season - ", "Spieltag ");
+                        select.appendChild(opt);
+                    });
+                    getCurrentRound();
+                }
+            } catch (e) {}
+        }
+
+        async function getCurrentRound() {
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/fixtures/rounds?league=${leagueId}&season=${season}&current=true`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                const select = document.getElementById("matchdaySelect");
+                if(data.response && data.response.length > 0) {
+                    currentMatchday = data.response[0];
+                    select.value = currentMatchday;
+                } else if(select.options.length > 0) { currentMatchday = select.options[0].value; }
+                loadMatchday(currentMatchday);
+            } catch(e) {
+                const select = document.getElementById("matchdaySelect");
+                if(select.options.length > 0) { currentMatchday = select.options[0].value; loadMatchday(currentMatchday); }
+            }
+        }
+
+        async function loadMatchday(round, background = false) {
+            currentMatchday = round;
+            document.getElementById("matchdayTitle").textContent = round.replace("Regular Season - ", "Spieltag ");
+            const container = document.getElementById("matchesList");
+            if (!background) container.innerHTML = "Lade Spiele...";
+
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&season=${season}&round=${round}`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                
+                if(data.response && data.response.length > 0) {
+                    container.innerHTML = "";
+                    let tickerHtml = "";
+                    let hasLiveGames = false;
+                    
+                    const matchPromises = data.response.map(async m => {
+                        const fixtureId = m.fixture.id;
+                        let events = m.events || [];
+                        if (events.length === 0 && ['FT', '1H', '2H', 'ET', 'P', 'HT'].includes(m.fixture.status.short)) {
+                            try {
+                                const evRes = await fetch(`https://v3.football.api-sports.io/fixtures?id=${fixtureId}`, { headers: { "x-apisports-key": apiKey } });
+                                const evData = await evRes.json();
+                                if(evData.response) events = evData.response[0].events || [];
+                            } catch(err) {}
+                        }
+                        return { match: m, events: events };
+                    });
+
+                    const resolvedMatches = await Promise.all(matchPromises);
+
+                    resolvedMatches.forEach(({ match: m, events }) => {
+                        const fixtureId = m.fixture.id;
+                        const home = m.teams.home;
+                        const away = m.teams.away;
+                        const goalsHome = m.goals.home ?? 0;
+                        const goalsAway = m.goals.away ?? 0;
+
+                        let isLive = ["1H", "2H", "ET", "P", "HT"].includes(m.fixture.status.short);
+                        if (isLive) hasLiveGames = true;
+
+                        if (previousScores[fixtureId] !== undefined) {
+                            if (goalsHome > previousScores[fixtureId].home || goalsAway > previousScores[fixtureId].away) {
+                                let scoringTeam = goalsHome > previousScores[fixtureId].home ? home.name : away.name;
+                                let latestGoal = events.filter(ev => ev.type === 'Goal').pop();
+                                showGoalAlert(scoringTeam, latestGoal ? `${latestGoal.player.name} (${latestGoal.time.elapsed}. Min)` : "Tor", `${home.name} - ${away.name}`);
+                            }
+                        }
+                        previousScores[fixtureId] = { home: goalsHome, away: goalsAway };
+
+                        let displayHome = m.goals.home !== null ? m.goals.home : "-";
+                        let displayAway = m.goals.away !== null ? m.goals.away : "-";
+                        let isFinished = ["FT", "AET", "PEN"].includes(m.fixture.status.short);
+
+                        let dateDisplay = isLive ? `<span class="live-badge">LIVE ${m.fixture.status.elapsed || ''}'</span>` : (isFinished ? `<span style="color:var(--text-muted);">Beendet</span>` : new Date(m.fixture.date).toLocaleDateString("de-DE", { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }));
+
+                        let isScfMatch = home.name.includes("Freiburg") || away.name.includes("Freiburg");
+                        tickerHtml += `<span class="ticker-item ${isScfMatch ? 'scf-ticker' : ''}"><img src="${home.logo}" class="ticker-team-logo">${home.name} <span class="ticker-score">${displayHome}:${displayAway}</span> ${away.name} <img src="${away.logo}" class="ticker-team-logo"></span>`;
+
+                        let scorersHtml = "";
+                        let goalEvents = events.filter(ev => ev.type === 'Goal');
+                        if (goalEvents.length > 0) {
+                            scorersHtml = `<div class="match-scorers-preview">`;
+                            let cH = 0, cA = 0;
+                            goalEvents.forEach(ge => {
+                                if (ge.team.id === home.id) cH++; else cA++;
+                                scorersHtml += `<div class="scorer-tag"><span class="scorer-score-badge">${cH}:${cA}</span><span>⚽ ${ge.time.elapsed}' ${ge.player.name}</span></div>`;
+                            });
+                            scorersHtml += `</div>`;
+                        }
+
+                        const itemDiv = document.createElement("div");
+                        itemDiv.className = "match-card-item" + (isScfMatch ? " scf-highlight" : "");
+                        itemDiv.onclick = () => openMatchDetails(m.fixture.id);
+                        itemDiv.innerHTML = `<div class="match-main-row"><div class="team home"><span>${home.name}</span><img src="${home.logo}"></div><div class="score-box"><div class="score">${displayHome} : ${displayAway}</div><span class="match-info-sub">${dateDisplay}</span></div><div class="team"><img src="${away.logo}"><span>${away.name}</span></div></div>${scorersHtml}`;
+                        container.appendChild(itemDiv);
+                    });
+                    document.getElementById('tickerTrack').innerHTML = tickerHtml + tickerHtml;
+
+                    manageSmartPolling(hasLiveGames);
+                }
+            } catch(e) {}
+        }
+
+        async function openMatchDetails(fixtureId) {
+            const modal = document.getElementById("matchModal");
+            modal.style.display = "flex";
+            document.getElementById("modalTeamsHeader").innerHTML = "Lade Spieldetails...";
+            document.getElementById("modalEvents").innerHTML = "Lade Tore...";
+            document.getElementById("modalLineups").innerHTML = "Lade Aufstellungen, Wechsel & Karten...";
+            document.getElementById("modalStats").innerHTML = "Lade Statistiken...";
+            document.getElementById("modalStatus").textContent = "";
+            document.getElementById("modalReferee").textContent = "";
+
+            try {
+                const [fixRes, statsRes, lineupsRes] = await Promise.all([
+                    fetch(`https://v3.football.api-sports.io/fixtures?id=${fixtureId}`, { headers: { "x-apisports-key": apiKey } }),
+                    fetch(`https://v3.football.api-sports.io/fixtures/statistics?fixture=${fixtureId}`, { headers: { "x-apisports-key": apiKey } }),
+                    fetch(`https://v3.football.api-sports.io/fixtures/lineups?fixture=${fixtureId}`, { headers: { "x-apisports-key": apiKey } })
+                ]);
+
+                const fixData = await fixRes.json();
+                const statsData = await statsRes.json();
+                const lineupsData = await lineupsRes.json();
+
+                if(fixData.response && fixData.response.length > 0) {
+                    const match = fixData.response[0];
+                    const home = match.teams.home;
+                    const away = match.teams.away;
+
+                    document.getElementById("modalTeamsHeader").innerHTML = `<div style="display:flex; align-items:center; gap:8px;"><img src="${home.logo}">${home.name}</div><div style="background:#241414; padding:4px 12px; border-radius:6px; border:1px solid var(--border-color);">${match.goals.home ?? 0} : ${match.goals.away ?? 0}</div><div style="display:flex; align-items:center; gap:8px;"><img src="${away.logo}">${away.name}</div>`;
+                    document.getElementById("modalStatus").textContent = `Status: ${match.fixture.status.long}`;
+                    if(match.fixture.referee) document.getElementById("modalReferee").textContent = `👨‍⚖️ Schiedsrichter: ${match.fixture.referee}`;
+
+                    let evHtml = "";
+                    if (match.events) {
+                        let hG = 0, aG = 0;
+                        match.events.forEach(ev => {
+                            if (ev.type === 'Goal') {
+                                if (ev.team.id === home.id) hG++; else aG++;
+                                evHtml += `<div class="event-item"><div style="display:flex; align-items:center; gap:10px;"><span class="event-time">${ev.time.elapsed}'</span><span>⚽ <b>${ev.player.name}</b> (${ev.team.name})</span></div><span class="event-score">${hG}:${aG}</span></div>`;
+                            }
+                        });
+                    }
+                    document.getElementById("modalEvents").innerHTML = evHtml !== "" ? evHtml : "Keine Tore.";
+
+                    let lineupsHtml = "Aufstellungen noch nicht verfügbar.";
+                    if (lineupsData.response && lineupsData.response.length === 2) {
+                        let lHome = lineupsData.response[0];
+                        let lAway = lineupsData.response[1];
+
+                        function formatTeamDetails(lineupObj, teamObj) {
+                            let start11 = lineupObj.startXI.map(p => `${p.player.name} (${p.player.pos})`).join(", ");
+                            let subs = lineupObj.substitutes.map(p => `${p.player.name}`).join(", ");
+                            let teamEvents = (match.events || []).filter(ev => ev.team.id === teamObj.id);
+                            let subsEvents = teamEvents.filter(ev => ev.type === 'subst').map(ev => `<div style="font-size:0.8rem; color:var(--text-muted);">🔄 ${ev.time.elapsed}' Ein: ${ev.player.name} | Aus: ${ev.assist.name}</div>`).join("");
+                            let cardsEvents = teamEvents.filter(ev => ev.type === 'Card').map(ev => {
+                                let cIcon = ev.detail === 'Red Card' ? '🟥' : (ev.detail === 'Yellow Red Card' ? '🟨🟥' : '🟨');
+                                return `<div style="font-size:0.8rem; color:var(--text-muted);">${cIcon} ${ev.time.elapsed}' ${ev.player.name}</div>`;
+                            }).join("");
+
+                            return `
+                                <div style="background:#170d0d; padding:12px; border-radius:8px; border:1px solid var(--border-color); flex:1;">
+                                    <div style="font-weight:bold; color:var(--scf-bright-red); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+                                        <img src="${teamObj.logo}" style="width:18px; height:18px; object-fit:contain;"> ${teamObj.name}
+                                    </div>
+                                    <div style="font-size:0.85rem; margin-bottom:6px;">Formation: <b>${lineupObj.formation || 'N/V'}</b> | Trainer: ${lineupObj.coach?.name || '-' }</div>
+                                    <div style="font-size:0.82rem; margin-bottom:6px; color:var(--text-muted);"><b>Startelf:</b> ${start11}</div>
+                                    <div style="font-size:0.82rem; margin-bottom:8px; color:var(--text-muted);"><b>Bank:</b> ${subs}</div>
+                                    ${subsEvents ? `<div style="margin-top:6px; border-top:1px dashed var(--border-color); padding-top:4px;"><b>Auswechslungen:</b>${subsEvents}</div>` : ''}
+                                    ${cardsEvents ? `<div style="margin-top:6px; border-top:1px dashed var(--border-color); padding-top:4px;"><b>Karten:</b>${cardsEvents}</div>` : ''}
+                                </div>
+                            `;
+                        }
+
+                        lineupsHtml = `<div style="display:flex; flex-direction:column; gap:15px;">
+                            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                                ${formatTeamDetails(lHome, home)}
+                                ${formatTeamDetails(lAway, away)}
+                            </div>
+                        </div>`;
+                    }
+                    document.getElementById("modalLineups").innerHTML = lineupsHtml;
+
+                    let statsHtml = "";
+                    if (statsData.response && statsData.response.length === 2) {
+                        let hStats = statsData.response[0].statistics;
+                        let aStats = statsData.response[1].statistics;
+                        for (let i = 0; i < hStats.length; i++) {
+                            let hVal = hStats[i].value ?? 0;
+                            let aVal = aStats[i].value ?? 0;
+                            let total = (parseFloat(hVal) || 0) + (parseFloat(aVal) || 0);
+                            let hPer = total > 0 ? ((parseFloat(hVal) || 0) / total) * 100 : 50;
+                            statsHtml += `<div class="stat-row"><div class="stat-info"><span>${hVal}</span><span>${hStats[i].type}</span><span>${aVal}</span></div><div class="stat-bar-container"><div class="stat-bar-home" style="width: ${hPer}%;"></div><div class="stat-bar-away" style="width: ${100 - hPer}%;"></div></div></div>`;
+                        }
+                    }
+                    document.getElementById("modalStats").innerHTML = statsHtml !== "" ? statsHtml : "Keine Statistiken verfügbar.";
+                }
+            } catch(e) {}
+        }
+
+        function changeMatchday(direction) {
+            const select = document.getElementById("matchdaySelect");
+            const index = select.selectedIndex;
+            if(index + direction >= 0 && index + direction < select.options.length) {
+                select.selectedIndex = index + direction;
+                loadMatchday(select.value);
+            }
+        }
+
+        async function loadTable() {
+            const container = document.getElementById("tableContainer");
+            try {
+                const res = await fetch(`https://v3.football.api-sports.io/standings?league=${leagueId}&season=${season}`, { headers: { "x-apisports-key": apiKey } });
+                const data = await res.json();
+                if(data.response && data.response.length > 0) {
+                    const standings = data.response[0].league.standings[0];
+                    let html = `<table><tr><th>#</th><th>Team</th><th class="center">Sp</th><th class="center">S/U/N</th><th class="center">Tore</th><th class="right">Pkt</th></tr>`;
+                    
+                    let top3Html = "";
+                    for(let i = 0; i < Math.min(3, standings.length); i++) {
+                        let s = standings[i];
+                        let isScf = s.team.name.includes("Freiburg");
+                        top3Html += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; padding:3px 0; border-bottom:1px solid var(--border-color);" class="${isScf ? 'scf-highlight' : ''}"><div style="display:flex; align-items:center; gap:6px;"><b>${s.rank}.</b><img src="${s.team.logo}" style="width:16px; height:16px; object-fit:contain;"><span>${s.team.name}</span></div><span style="background:#241414; padding:1px 6px; border-radius:4px; font-weight:bold; color:var(--scf-bright-red);">${s.points} Pkt</span></div>`;
+                    }
+                    document.getElementById("top3TableWidget").innerHTML = top3Html;
+
+                    standings.forEach(s => {
+                        let zoneClass = s.rank <= 4 ? "cl-zone" : (s.rank === 5 ? "el-zone" : (s.rank === 6 ? "ecl-zone" : (s.rank === 16 ? "relegation-zone" : (s.rank >= 17 ? "reflux-zone" : ""))));
+                        if (s.team.name.includes("Freiburg")) zoneClass += " scf-team-row";
+                        
+                        html += `<tr class="table-row ${zoneClass}" onclick="openTeamStats(${s.team.id}, '${s.team.name}', '${s.team.logo}')">
+                            <td><b>${s.rank}</b></td>
+                            <td><div class="table-team"><img src="${s.team.logo}"><span>${s.team.name}</span></div></td>
+                            <td class="center">${s.all.played}</td>
+                            <td class="center">${s.all.win}/${s.all.draw}/${s.all.lose}</td>
+                            <td class="center">${s.all.goals.for}:${s.all.goals.against}</td>
+                            <td class="right"><b>${s.points}</b></td>
+                        </tr>`;
+                    });
+                    container.innerHTML = html + `</table>`;
+                }
+            } catch(e) {
+                container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">Fehler beim Laden der Tabelle.</div>`;
+            }
+        }
+
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
